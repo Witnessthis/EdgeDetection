@@ -1,0 +1,2 @@
+xst -intstyle ise -ifn "D:/Storage/GitClone/VHDLEdgeDetection/EdgeDetection/testbench.xst" -ofn "D:/Storage/GitClone/VHDLEdgeDetection/EdgeDetection/testbench.syr" 
+xst -intstyle ise -ifn "D:/Storage/GitClone/VHDLEdgeDetection/EdgeDetection/testbench.xst" -ofn "D:/Storage/GitClone/VHDLEdgeDetection/EdgeDetection/testbench.syr" 

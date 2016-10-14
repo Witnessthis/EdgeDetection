@@ -1,0 +1,2 @@
+vhdl work "../types.vhd"
+vhdl work "../acc2.vhd"

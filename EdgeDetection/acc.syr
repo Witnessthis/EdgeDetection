@@ -1,0 +1,432 @@
+Release 14.7 - xst P.20131013 (nt)
+Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
+--> Parameter TMPDIR set to xst/projnav.tmp
+
+
+Total REAL time to Xst completion: 0.00 secs
+Total CPU time to Xst completion: 0.10 secs
+ 
+--> Parameter xsthdpdir set to xst
+
+
+Total REAL time to Xst completion: 0.00 secs
+Total CPU time to Xst completion: 0.10 secs
+ 
+--> Reading design: acc.prj
+
+TABLE OF CONTENTS
+  1) Synthesis Options Summary
+  2) HDL Parsing
+  3) HDL Elaboration
+  4) HDL Synthesis
+       4.1) HDL Synthesis Report
+  5) Advanced HDL Synthesis
+       5.1) Advanced HDL Synthesis Report
+  6) Low Level Synthesis
+  7) Partition Report
+  8) Design Summary
+       8.1) Primitive and Black Box Usage
+       8.2) Device utilization summary
+       8.3) Partition Resource Summary
+       8.4) Timing Report
+            8.4.1) Clock Information
+            8.4.2) Asynchronous Control Signals Information
+            8.4.3) Timing Summary
+            8.4.4) Timing Details
+            8.4.5) Cross Clock Domains Report
+
+
+=========================================================================
+*                      Synthesis Options Summary                        *
+=========================================================================
+---- Source Parameters
+Input File Name                    : "acc.prj"
+Ignore Synthesis Constraint File   : NO
+
+---- Target Parameters
+Output File Name                   : "acc"
+Output Format                      : NGC
+Target Device                      : xc6slx16-3-csg324
+
+---- Source Options
+Top Module Name                    : acc
+Automatic FSM Extraction           : YES
+FSM Encoding Algorithm             : Auto
+Safe Implementation                : No
+FSM Style                          : LUT
+RAM Extraction                     : Yes
+RAM Style                          : Auto
+ROM Extraction                     : Yes
+Shift Register Extraction          : YES
+ROM Style                          : Auto
+Resource Sharing                   : YES
+Asynchronous To Synchronous        : NO
+Shift Register Minimum Size        : 2
+Use DSP Block                      : Auto
+Automatic Register Balancing       : No
+
+---- Target Options
+LUT Combining                      : Auto
+Reduce Control Sets                : Auto
+Add IO Buffers                     : YES
+Global Maximum Fanout              : 100000
+Add Generic Clock Buffer(BUFG)     : 16
+Register Duplication               : YES
+Optimize Instantiated Primitives   : NO
+Use Clock Enable                   : Auto
+Use Synchronous Set                : Auto
+Use Synchronous Reset              : Auto
+Pack IO Registers into IOBs        : Auto
+Equivalent register Removal        : YES
+
+---- General Options
+Optimization Goal                  : Speed
+Optimization Effort                : 1
+Power Reduction                    : NO
+Keep Hierarchy                     : No
+Netlist Hierarchy                  : As_Optimized
+RTL Output                         : Yes
+Global Optimization                : AllClockNets
+Read Cores                         : YES
+Write Timing Constraints           : NO
+Cross Clock Analysis               : NO
+Hierarchy Separator                : /
+Bus Delimiter                      : <>
+Case Specifier                     : Maintain
+Slice Utilization Ratio            : 100
+BRAM Utilization Ratio             : 100
+DSP48 Utilization Ratio            : 100
+Auto BRAM Packing                  : NO
+Slice Utilization Ratio Delta      : 5
+
+=========================================================================
+
+
+=========================================================================
+*                          HDL Parsing                                  *
+=========================================================================
+Parsing VHDL file "D:\Storage\GitClone\VHDLEdgeDetection\types.vhd" into library work
+Parsing package <types>.
+Parsing package body <types>.
+Parsing VHDL file "D:\Storage\GitClone\VHDLEdgeDetection\acc2.vhd" into library work
+Parsing entity <acc>.
+Parsing architecture <structure> of entity <acc>.
+
+=========================================================================
+*                            HDL Elaboration                            *
+=========================================================================
+
+Elaborating entity <acc> (architecture <structure>) from library <work>.
+WARNING:HDLCompiler:92 - "D:\Storage\GitClone\VHDLEdgeDetection\acc2.vhd" Line 91: datar should be on the sensitivity list of the process
+
+=========================================================================
+*                           HDL Synthesis                               *
+=========================================================================
+
+Synthesizing Unit <acc>.
+    Related source file is "D:\Storage\GitClone\VHDLEdgeDetection\acc2.vhd".
+    Found 16-bit register for signal <outPixReg>.
+    Found 16-bit register for signal <inPixReg>.
+    Found 32-bit register for signal <addrAcc>.
+    Found 3-bit register for signal <s_state>.
+    Found finite state machine <FSM_0> for signal <s_state>.
+    -----------------------------------------------------------------------
+    | States             | 6                                              |
+    | Transitions        | 8                                              |
+    | Inputs             | 2                                              |
+    | Outputs            | 5                                              |
+    | Clock              | clk (rising_edge)                              |
+    | Reset              | reset (positive)                               |
+    | Reset type         | asynchronous                                   |
+    | Reset State        | s0                                             |
+    | Power Up State     | s0                                             |
+    | Encoding           | auto                                           |
+    | Implementation     | LUT                                            |
+    -----------------------------------------------------------------------
+    Found 32-bit adder for signal <addrAcc[31]_GND_5_o_add_2_OUT> created at line 102.
+    Found 32-bit adder for signal <addrAcc[31]_GND_5_o_add_5_OUT> created at line 1241.
+    Summary:
+	inferred   2 Adder/Subtractor(s).
+	inferred  64 D-type flip-flop(s).
+	inferred   4 Multiplexer(s).
+	inferred   1 Finite State Machine(s).
+Unit <acc> synthesized.
+
+=========================================================================
+HDL Synthesis Report
+
+Macro Statistics
+# Adders/Subtractors                                   : 2
+ 32-bit adder                                          : 2
+# Registers                                            : 3
+ 16-bit register                                       : 2
+ 32-bit register                                       : 1
+# Multiplexers                                         : 4
+ 1-bit 2-to-1 multiplexer                              : 1
+ 16-bit 2-to-1 multiplexer                             : 1
+ 32-bit 2-to-1 multiplexer                             : 2
+# FSMs                                                 : 1
+
+=========================================================================
+
+=========================================================================
+*                       Advanced HDL Synthesis                          *
+=========================================================================
+
+
+Synthesizing (advanced) Unit <acc>.
+The following registers are absorbed into counter <addrAcc>: 1 register on signal <addrAcc>.
+Unit <acc> synthesized (advanced).
+
+=========================================================================
+Advanced HDL Synthesis Report
+
+Macro Statistics
+# Adders/Subtractors                                   : 1
+ 32-bit adder                                          : 1
+# Counters                                             : 1
+ 32-bit up counter                                     : 1
+# Registers                                            : 32
+ Flip-Flops                                            : 32
+# Multiplexers                                         : 3
+ 1-bit 2-to-1 multiplexer                              : 1
+ 16-bit 2-to-1 multiplexer                             : 1
+ 32-bit 2-to-1 multiplexer                             : 1
+# FSMs                                                 : 1
+
+=========================================================================
+
+=========================================================================
+*                         Low Level Synthesis                           *
+=========================================================================
+Analyzing FSM <MFsm> for best encoding.
+Optimizing FSM <FSM_0> on signal <s_state[1:3]> with user encoding.
+-------------------
+ State | Encoding
+-------------------
+ s0    | 000
+ s1    | 001
+ s2    | 010
+ s3    | 011
+ s15   | 100
+ s4    | 101
+-------------------
+
+Optimizing unit <acc> ...
+
+Mapping all equations...
+Building and optimizing final netlist ...
+Found area constraint ratio of 100 (+ 5) on block acc, actual ratio is 1.
+FlipFlop s_state_FSM_FFd1 has been replicated 1 time(s)
+FlipFlop s_state_FSM_FFd2 has been replicated 1 time(s)
+FlipFlop s_state_FSM_FFd3 has been replicated 1 time(s)
+
+Final Macro Processing ...
+
+=========================================================================
+Final Register Report
+
+Macro Statistics
+# Registers                                            : 70
+ Flip-Flops                                            : 70
+
+=========================================================================
+
+=========================================================================
+*                           Partition Report                            *
+=========================================================================
+
+Partition Implementation Status
+-------------------------------
+
+  No Partitions were found in this design.
+
+-------------------------------
+
+=========================================================================
+*                            Design Summary                             *
+=========================================================================
+
+Top Level Output File Name         : acc.ngc
+
+Primitive and Black Box Usage:
+------------------------------
+# BELS                             : 253
+#      GND                         : 1
+#      INV                         : 21
+#      LUT1                        : 19
+#      LUT2                        : 35
+#      LUT3                        : 21
+#      LUT4                        : 17
+#      LUT5                        : 24
+#      LUT6                        : 6
+#      MUXCY                       : 53
+#      VCC                         : 1
+#      XORCY                       : 55
+# FlipFlops/Latches                : 70
+#      FDC                         : 6
+#      FDCE                        : 64
+# Clock Buffers                    : 1
+#      BUFGP                       : 1
+# IO Buffers                       : 69
+#      IBUF                        : 18
+#      OBUF                        : 51
+
+Device utilization summary:
+---------------------------
+
+Selected Device : 6slx16csg324-3 
+
+
+Slice Logic Utilization: 
+ Number of Slice Registers:              70  out of  18224     0%  
+ Number of Slice LUTs:                  143  out of   9112     1%  
+    Number used as Logic:               143  out of   9112     1%  
+
+Slice Logic Distribution: 
+ Number of LUT Flip Flop pairs used:    144
+   Number with an unused Flip Flop:      74  out of    144    51%  
+   Number with an unused LUT:             1  out of    144     0%  
+   Number of fully used LUT-FF pairs:    69  out of    144    47%  
+   Number of unique control sets:         4
+
+IO Utilization: 
+ Number of IOs:                          70
+ Number of bonded IOBs:                  70  out of    232    30%  
+
+Specific Feature Utilization:
+ Number of BUFG/BUFGCTRLs:                1  out of     16     6%  
+
+---------------------------
+Partition Resource Summary:
+---------------------------
+
+  No Partitions were found in this design.
+
+---------------------------
+
+
+=========================================================================
+Timing Report
+
+NOTE: THESE TIMING NUMBERS ARE ONLY A SYNTHESIS ESTIMATE.
+      FOR ACCURATE TIMING INFORMATION PLEASE REFER TO THE TRACE REPORT
+      GENERATED AFTER PLACE-and-ROUTE.
+
+Clock Information:
+------------------
+-----------------------------------+------------------------+-------+
+Clock Signal                       | Clock buffer(FF name)  | Load  |
+-----------------------------------+------------------------+-------+
+clk                                | BUFGP                  | 70    |
+-----------------------------------+------------------------+-------+
+
+Asynchronous Control Signals Information:
+----------------------------------------
+No asynchronous control signals found in this design
+
+Timing Summary:
+---------------
+Speed Grade: -3
+
+   Minimum period: 3.750ns (Maximum Frequency: 266.642MHz)
+   Minimum input arrival time before clock: 3.331ns
+   Maximum output required time after clock: 7.026ns
+   Maximum combinational path delay: No path found
+
+Timing Details:
+---------------
+All values displayed in nanoseconds (ns)
+
+=========================================================================
+Timing constraint: Default period analysis for Clock 'clk'
+  Clock period: 3.750ns (frequency: 266.642MHz)
+  Total number of paths / destination ports: 1442 / 118
+-------------------------------------------------------------------------
+Delay:               3.750ns (Levels of Logic = 3)
+  Source:            addrAcc_1 (FF)
+  Destination:       s_state_FSM_FFd3 (FF)
+  Source Clock:      clk rising
+  Destination Clock: clk rising
+
+  Data Path: addrAcc_1 to s_state_FSM_FFd3
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     FDCE:C->Q             3   0.447   1.015  addrAcc_1 (addrAcc_1)
+     LUT6:I0->O            1   0.203   0.924  GND_5_o_addrAcc[31]_equal_4_o<31>2 (GND_5_o_addrAcc[31]_equal_4_o<31>1)
+     LUT6:I1->O            3   0.203   0.651  GND_5_o_addrAcc[31]_equal_4_o<31>7 (GND_5_o_addrAcc[31]_equal_4_o)
+     LUT4:I3->O            2   0.205   0.000  s_state_FSM_FFd1-In1 (s_state_FSM_FFd1-In)
+     FDC:D                     0.102          s_state_FSM_FFd1
+    ----------------------------------------
+    Total                      3.750ns (1.160ns logic, 2.590ns route)
+                                       (30.9% logic, 69.1% route)
+
+=========================================================================
+Timing constraint: Default OFFSET IN BEFORE for Clock 'clk'
+  Total number of paths / destination ports: 88 / 88
+-------------------------------------------------------------------------
+Offset:              3.331ns (Levels of Logic = 1)
+  Source:            reset (PAD)
+  Destination:       inPixReg_0 (FF)
+  Destination Clock: clk rising
+
+  Data Path: reset to inPixReg_0
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     IBUF:I->O            70   1.222   1.679  reset_IBUF (reset_IBUF)
+     FDCE:CLR                  0.430          inPixReg_0
+    ----------------------------------------
+    Total                      3.331ns (1.652ns logic, 1.679ns route)
+                                       (49.6% logic, 50.4% route)
+
+=========================================================================
+Timing constraint: Default OFFSET OUT AFTER for Clock 'clk'
+  Total number of paths / destination ports: 481 / 51
+-------------------------------------------------------------------------
+Offset:              7.026ns (Levels of Logic = 4)
+  Source:            addrAcc_1 (FF)
+  Destination:       finish (PAD)
+  Source Clock:      clk rising
+
+  Data Path: addrAcc_1 to finish
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     FDCE:C->Q             3   0.447   1.015  addrAcc_1 (addrAcc_1)
+     LUT6:I0->O            1   0.203   0.924  GND_5_o_addrAcc[31]_equal_4_o<31>2 (GND_5_o_addrAcc[31]_equal_4_o<31>1)
+     LUT6:I1->O            3   0.203   0.879  GND_5_o_addrAcc[31]_equal_4_o<31>7 (GND_5_o_addrAcc[31]_equal_4_o)
+     LUT3:I0->O            1   0.205   0.579  Mmux_finish11 (finish_OBUF)
+     OBUF:I->O                 2.571          finish_OBUF (finish)
+    ----------------------------------------
+    Total                      7.026ns (3.629ns logic, 3.397ns route)
+                                       (51.6% logic, 48.4% route)
+
+=========================================================================
+
+Cross Clock Domains Report:
+--------------------------
+
+Clock to Setup on destination clock clk
+---------------+---------+---------+---------+---------+
+               | Src:Rise| Src:Fall| Src:Rise| Src:Fall|
+Source Clock   |Dest:Rise|Dest:Rise|Dest:Fall|Dest:Fall|
+---------------+---------+---------+---------+---------+
+clk            |    3.750|         |         |         |
+---------------+---------+---------+---------+---------+
+
+=========================================================================
+
+
+Total REAL time to Xst completion: 5.00 secs
+Total CPU time to Xst completion: 4.64 secs
+ 
+--> 
+
+Total memory usage is 246624 kilobytes
+
+Number of errors   :    0 (   0 filtered)
+Number of warnings :    1 (   0 filtered)
+Number of infos    :    0 (   0 filtered)
+

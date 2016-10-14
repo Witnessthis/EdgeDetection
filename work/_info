@@ -1,0 +1,215 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 dD:/Storage/GitClone/VHDLEdgeDetection
+Eacc
+Z1 w1476434753
+Z2 DPx4 work 5 types 0 22 nlM>`N[]H?QOD8eJgbCIX3
+Z3 DPx4 ieee 11 numeric_std 0 22 :ASDNFgHXf_ih3J@9F3Ze1
+Z4 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
+Z5 DPx4 ieee 14 std_logic_1164 0 22 eNV`TJ_GofJTzYa?f<@Oe1
+R0
+Z6 8acc2.vhd
+Z7 Facc2.vhd
+l0
+L33
+VmV0S0oinN@1YA?gjoGPaQ2
+!s100 IzX`LKQk8d=6XaEh=Lccf3
+Z8 OP;C;10.4a;61
+32
+Z9 !s110 1476434767
+!i10b 1
+Z10 !s108 1476434767.000000
+Z11 !s90 -reportprogress|300|-quiet|acc2.vhd|
+Z12 !s107 acc2.vhd|
+!i113 1
+Z13 o-quiet -O0
+Z14 tExplicit 1
+Astructure
+R2
+R3
+R4
+R5
+DEx4 work 3 acc 0 22 mV0S0oinN@1YA?gjoGPaQ2
+l62
+L49
+V8`M3>2mLn_EB<DjhOIbK^1
+!s100 >1m^fLMV`8G8LFYWKCRIc0
+R8
+32
+R9
+!i10b 1
+R10
+R11
+R12
+!i113 1
+R13
+R14
+Eclock
+Z15 w1352113480
+R4
+R5
+R0
+Z16 8clock.vhd
+Z17 Fclock.vhd
+l0
+L21
+V]15ja]TgOcA^iCXfe`]Mf2
+!s100 Kz8;hJmoPegSnN?c9[TDo1
+R8
+32
+R9
+!i10b 1
+R10
+Z18 !s90 -reportprogress|300|-quiet|clock.vhd|
+Z19 !s107 clock.vhd|
+!i113 1
+R13
+R14
+Abehaviour
+R4
+R5
+DEx4 work 5 clock 0 22 ]15ja]TgOcA^iCXfe`]Mf2
+l29
+L28
+VJJBTJ;<GNT;<?glFRgLEW2
+!s100 zTiDl5;cQZCYS:1QeIbY>3
+R8
+32
+R9
+!i10b 1
+R10
+R18
+R19
+!i113 1
+R13
+R14
+Ememory2
+Z20 w1352124874
+R2
+R4
+R5
+R0
+Z21 8memory2.vhd
+Z22 Fmemory2.vhd
+l0
+L24
+VD]6Z^JH6:1I@4nA7RANAR3
+!s100 64EeQNK:K`e[T[[`73EK?3
+R8
+32
+R9
+!i10b 1
+R10
+Z23 !s90 -reportprogress|300|-quiet|memory2.vhd|
+Z24 !s107 memory2.vhd|
+!i113 1
+R13
+R14
+Abehaviour
+R2
+DEx4 work 7 memory2 0 22 D]6Z^JH6:1I@4nA7RANAR3
+R3
+R4
+R5
+l88
+L52
+VE^Hk6lbJfRldkD_27b]fj1
+!s100 i^PGlHl6KEIDkQXIQ3=`;0
+R8
+32
+R9
+!i10b 1
+R10
+R23
+R24
+!i113 1
+R13
+R14
+Etestbench
+Z25 w1352128752
+R2
+R4
+R5
+R0
+Z26 8test2.vhd
+Z27 Ftest2.vhd
+l0
+L26
+VN02IhLRX3z@8nzh[8z>z53
+!s100 9aQSdNiCIBEo10eg4i7L91
+R8
+32
+R9
+!i10b 1
+R10
+Z28 !s90 -reportprogress|300|-quiet|test2.vhd|
+Z29 !s107 test2.vhd|
+!i113 1
+R13
+R14
+Astructure
+R2
+R4
+R5
+Z30 DEx4 work 9 testbench 0 22 N02IhLRX3z@8nzh[8z>z53
+l74
+L29
+Z31 VLWEJ_GdQlO2?8S]bik7k10
+Z32 !s100 1^gFZKJbedOHi04oL_Sd<2
+R8
+32
+R9
+!i10b 1
+R10
+R28
+R29
+!i113 1
+R13
+R14
+Ptypes
+R4
+R5
+R15
+R0
+Z33 8types.vhd
+Z34 Ftypes.vhd
+l0
+L33
+VnlM>`N[]H?QOD8eJgbCIX3
+!s100 `a2oa58CYK9@MO4kLM@_03
+R8
+32
+Z35 !s110 1476434766
+!i10b 1
+Z36 !s108 1476434766.000000
+Z37 !s90 -reportprogress|300|-quiet|types.vhd|
+Z38 !s107 types.vhd|
+!i113 1
+R13
+R14
+Bbody
+R2
+R4
+R5
+l0
+L62
+Vhn@JTSicgENPE^[Ae1kcM3
+!s100 66XPo^;>mzNiA6RNa^SG12
+R8
+32
+R35
+!i10b 1
+R36
+R37
+R38
+!i113 1
+R13
+R14
+nbody
