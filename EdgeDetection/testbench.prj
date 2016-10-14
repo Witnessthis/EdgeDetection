@@ -1,5 +1,0 @@
-vhdl work "../types.vhd"
-vhdl work "../memory2.vhd"
-vhdl work "../clock.vhd"
-vhdl work "../acc2.vhd"
-vhdl work "../test2.vhd"
