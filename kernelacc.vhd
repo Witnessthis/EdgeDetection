@@ -53,13 +53,13 @@ ARCHITECTURE structure OF acc IS
 -- StartWriteAddress = 50688
 type state_type IS (idle, readState, writeState, invert, decisionState);
 
-constant MAX_ADDR : word_t := word_t(to_unsigned(50687, 32));
+constant IMG_ADDR_OOB : word_t := word_t(to_unsigned(50688, 32));
 constant START_WRITE_ADDR : word_t := word_t(to_unsigned(50688, 32));
 
 signal addrAcc, addrAcc_next : word_t;
 signal currState, State_next : state_type;
 signal regRow1, regRow2, regRow3 : word_t;
-signal Row1MSB_next, Row1LSB_next, Row2MSB_next, Row2LSB_next, Row3MSB_next, Row3LSB_next : halfword_t
+signal Row1MSB_next, Row1LSB_next, Row2MSB_next, Row2LSB_next, Row3MSB_next, Row3LSB_next : halfword_t;
 signal regCtrlFlag, CtrlFlag_next : std_logic_vector(2 downto 0);
 
 
@@ -77,12 +77,12 @@ BEGIN
 
 	addrAcc_next <= addrAcc;
 	CtrlFlag_next <= regCtrlFlag;
-	Row1MSB_next <= (others => '0');
-	Row1LSB_next <= (others => '0');
-	Row2MSB_next <= (others => '0');
-	Row2LSB_next <= (others => '0');
-	Row3MSB_next <= (others => '0');
-	Row3LSB_next <= (others => '0');
+	Row1MSB_next <= regRow1(31 downto 16);
+	Row1LSB_next <= regRow1(15 downto 0);
+	Row2MSB_next <= regRow2(31 downto 16);
+	Row2LSB_next <= regRow2(15 downto 0);
+	Row3MSB_next <= regRow3(31 downto 16);
+	Row3LSB_next <= regRow3(15 downto 0);
 	
 	CASE (currState) IS
 		WHEN idle =>
@@ -92,6 +92,7 @@ BEGIN
 				req <= '1';
 				rw <= '1';
 				State_next <= readState;
+				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 			else
 				State_next <= idle;
 			end if;
@@ -103,46 +104,50 @@ BEGIN
 
 			
 			if (regCtrlFlag = "000") then
-				Row1MSB_next <= dataR(7 downto 0) & dataR(15 downto 8);
-
-				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
+				Row1MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
 				State_next <= readState;
 				
 			elsif (regCtrlFlag = "001") then
-				Row1LSB_next <= dataR(7 downto 0) & dataR(15 downto 8);
+				Row1LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 
-				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
 				State_next <= readState;
 
 			elsif (regCtrlFlag = "010") then
-				Row2MSB_next <= dataR(7 downto 0) & dataR(15 downto 8);
+				Row2MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
 
-				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 				State_next <= readState;
 
 			elsif (regCtrlFlag = "011") then
-				Row2LSB_next <= dataR(7 downto 0) & dataR(15 downto 8);
+				Row2LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 
-				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
 				State_next <= readState;
 
 			elsif (regCtrlFlag = "100") then
-				Row3MSB_next <= dataR(7 downto 0) & dataR(15 downto 8);
+				Row3MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				addrAcc_next <= word_t(unsigned(addrAcc) - 351);
 
-				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 				State_next <= readState;
 
 			elsif (regCtrlFlag = "101") then
-				Row3LSB_next <= dataR(7 downto 0) & dataR(15 downto 8);
-			
-				addrAcc_next <= word_t(unsigned(addrAcc) - 351);
+				req <= '0';
+				Row3LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+
 				State_next <= invert;
 			end if;
 
 		WHEN invert =>
-			nxtRow1 <= not regRow1;
-			nxtRow2 <= not regRow2;
-			nxtRow3 <= not regRow3;
+
+			Row1MSB_next <= not regRow1(31 downto 16);
+			Row1LSB_next <= not regRow1(15 downto 0);
+			Row2MSB_next <= not regRow2(31 downto 16);
+			Row2LSB_next <= not regRow2(15 downto 0);
+			Row3MSB_next <= not regRow3(31 downto 16);
+			Row3LSB_next <= not regRow3(15 downto 0);
+
 			CtrlFlag_next <= (others => '0');
 			addrAcc_next <= word_t(unsigned(addrAcc) + 50686);
 			req <= '1';
@@ -152,53 +157,48 @@ BEGIN
 		when writeState =>
 			req <= '1';
 			rw <= '0';
+			CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);	
 
 			if (regCtrlFlag = "000") then
-				State_next <= writeState;
-				CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+				dataW <= regRow1(22 downto 16) & regRow1(31 downto 23);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
-				
-				dataW <= regRow1(31 downto 16);
-			elsif (regCtrlFlag = "001") then
 				State_next <= writeState;
-				CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
 				
-				dataW <= regRow1(15 downto 0);
+			elsif (regCtrlFlag = "001") then
+				dataW <= regRow1(7 downto 0) & regRow1(15 downto 8);
+				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
+				State_next <= writeState;
+				
 
 			elsif (regCtrlFlag = "010") then
-				State_next <= writeState;
-				CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+ 				dataW <= regRow1(22 downto 16) & regRow1(31 downto 23);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
-				
- 				dataW <= regRow2(31 downto 16);
-			elsif (regCtrlFlag = "011") then
 				State_next <= writeState;
-				CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+				
+			elsif (regCtrlFlag = "011") then
+ 				dataW <= regRow2(7 downto 0) & regRow1(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
-
- 				dataW <= regRow2(15 downto 0);
+				State_next <= writeState;
 
 			elsif (regCtrlFlag = "100") then
-				State_next <= writeState;
-				CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+ 				dataW <= regRow1(22 downto 16) & regRow1(31 downto 23);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
+				State_next <= writeState;
 
- 				dataW <= regRow3(31 downto 16);
 			elsif (regCtrlFlag = "101") then
-				CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);				
-				addrAcc_next <= word_t(unsigned(addrAcc) - 51037);
-
- 				dataW <= regRow3(15 downto 0);
+ 				dataW <= regRow3(7 downto 0) & regRow1(15 downto 8);
+				addrAcc_next <= word_t(unsigned(addrAcc) - 51039);
  				State_next <= decisionState;
 			end if;
 
 		when decisionState =>
-			if (addrAcc = MAX_ADDR) then
+			if (addrAcc = IMG_ADDR_OOB) then
 				finish <= '1';
 				State_next <= idle;
 			else
-				State_next <= readState;
+				--State_next <= readState;
+				State_next <= idle;
+
 			end if ;
 
 	END CASE;
