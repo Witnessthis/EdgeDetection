@@ -89,10 +89,7 @@ BEGIN
 			addrAcc_next <= (others => '0');
 			CtrlFlag_next <= (others => '0');
 			if start = '1' then  
-				req <= '1';
-				rw <= '1';
 				State_next <= readState;
-				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 			else
 				State_next <= idle;
 			end if;
@@ -102,37 +99,40 @@ BEGIN
 			rw <= '1';
 			CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
 
-			
 			if (regCtrlFlag = "000") then
+				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
+				State_next <= readState;
+
+			elsif (regCtrlFlag = "001") then
 				Row1MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
 				State_next <= readState;
 				
-			elsif (regCtrlFlag = "001") then
+			elsif (regCtrlFlag = "010") then
 				Row1LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 
 				State_next <= readState;
 
-			elsif (regCtrlFlag = "010") then
+			elsif (regCtrlFlag = "011") then
 				Row2MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
 
 				State_next <= readState;
 
-			elsif (regCtrlFlag = "011") then
+			elsif (regCtrlFlag = "100") then
 				Row2LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 
 				State_next <= readState;
 
-			elsif (regCtrlFlag = "100") then
+			elsif (regCtrlFlag = "101") then
 				Row3MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) - 351);
 
 				State_next <= readState;
 
-			elsif (regCtrlFlag = "101") then
+			elsif (regCtrlFlag = "110") then
 				req <= '0';
 				Row3LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 
@@ -150,8 +150,6 @@ BEGIN
 
 			CtrlFlag_next <= (others => '0');
 			addrAcc_next <= word_t(unsigned(addrAcc) + 50686);
-			req <= '1';
-			rw <= '0';
 			State_next <= writeState;
 
 		when writeState =>
@@ -160,33 +158,33 @@ BEGIN
 			CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);	
 
 			if (regCtrlFlag = "000") then
-				dataW <= regRow1(22 downto 16) & regRow1(31 downto 23);
+				dataW(15 downto 0) <= regRow1(23 downto 16) & regRow1(31 downto 24);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 				State_next <= writeState;
 				
 			elsif (regCtrlFlag = "001") then
-				dataW <= regRow1(7 downto 0) & regRow1(15 downto 8);
+				dataW(15 downto 0) <= regRow1(7 downto 0) & regRow1(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
 				State_next <= writeState;
 				
 
 			elsif (regCtrlFlag = "010") then
- 				dataW <= regRow1(22 downto 16) & regRow1(31 downto 23);
+ 				dataW(15 downto 0) <= regRow1(23 downto 16) & regRow1(31 downto 24);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 				State_next <= writeState;
 				
 			elsif (regCtrlFlag = "011") then
- 				dataW <= regRow2(7 downto 0) & regRow1(15 downto 8);
+ 				dataW(15 downto 0) <= regRow2(7 downto 0) & regRow1(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
 				State_next <= writeState;
 
 			elsif (regCtrlFlag = "100") then
- 				dataW <= regRow1(22 downto 16) & regRow1(31 downto 23);
+ 				dataW(15 downto 0) <= regRow1(23 downto 16) & regRow1(31 downto 24);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 				State_next <= writeState;
 
 			elsif (regCtrlFlag = "101") then
- 				dataW <= regRow3(7 downto 0) & regRow1(15 downto 8);
+ 				dataW(15 downto 0) <= regRow3(7 downto 0) & regRow1(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) - 51039);
  				State_next <= decisionState;
 			end if;
@@ -196,9 +194,8 @@ BEGIN
 				finish <= '1';
 				State_next <= idle;
 			else
-				--State_next <= readState;
-				State_next <= idle;
-
+				State_next <= readState;
+				CtrlFlag_next <= (others => '0');
 			end if ;
 
 	END CASE;
@@ -219,9 +216,9 @@ begin
 		addrAcc <= addrAcc_next;
 		currState <= State_next;
 
-		regRow1 <= Row1MSB_next & Row1LSB_next;
-		regRow2 <= Row2MSB_next & Row2LSB_next;
-		regRow3 <= Row3MSB_next & Row3LSB_next;
+		regRow1(31 downto 0) <= Row1MSB_next & Row1LSB_next;
+		regRow2(31 downto 0) <= Row2MSB_next & Row2LSB_next;
+		regRow3(31 downto 0) <= Row3MSB_next & Row3LSB_next;
 
 		regCtrlFlag <= CtrlFlag_next;
   end if;
