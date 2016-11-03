@@ -57,10 +57,10 @@ constant MAX_ADDR : word_t := word_t(to_unsigned(50687, 32));
 constant START_WRITE_ADDR : word_t := word_t(to_unsigned(50688, 32));
 
 signal addrAcc, addrAcc_next : word_t;
-signal currState, nxtState : state_type;
-signal regRow1, regRow2 : word_t;
-signal nxtMsbRow1, nxtLsbRow1, nxtMsbRow2, nxtLsbRow2, nxtMsbRow3, nxtLsbRow3 : halfword_t
-signal regCtrlFlag, nxtCtrlFlag : std_logic_vector(2 downto 0);
+signal currState, State_next : state_type;
+signal regRow1, regRow2, regRow3 : word_t;
+signal Row1MSB_next, Row1LSB_next, Row2MSB_next, Row2LSB_next, Row3MSB_next, Row3LSB_next : halfword_t
+signal regCtrlFlag, CtrlFlag_next : std_logic_vector(2 downto 0);
 
 
 BEGIN
@@ -76,127 +76,129 @@ BEGIN
 	addr <= addrAcc;
 
 	addrAcc_next <= addrAcc;
-	nxtCtrlFlag <= regCtrlFlag;
-	nxtRow1 <= (others => '0');
-	nxtRow2 <= (others => '0');
-	nxtRow3 <= (others => '0');
+	CtrlFlag_next <= regCtrlFlag;
+	Row1MSB_next <= (others => '0');
+	Row1LSB_next <= (others => '0');
+	Row2MSB_next <= (others => '0');
+	Row2LSB_next <= (others => '0');
+	Row3MSB_next <= (others => '0');
+	Row3LSB_next <= (others => '0');
 	
 	CASE (currState) IS
 		WHEN idle =>
 			addrAcc_next <= (others => '0');
-			nxtCtrlFlag <= (others => '0');
+			CtrlFlag_next <= (others => '0');
 			if start = '1' then  
 				req <= '1';
 				rw <= '1';
-				nxtState <= readState;
+				State_next <= readState;
 			else
-				nxtState <= idle;
+				State_next <= idle;
 			end if;
 
 		WHEN readState =>
 			req <= '1';
 			rw <= '1';
+			CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+
 			
 			if (regCtrlFlag = "000") then
-				nxtState <= readState;
-				nxtRow1(31 downto 16) <= dataR;
-				nxtCtrlFlag <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+				Row1MSB_next <= dataR(7 downto 0) & dataR(15 downto 8);
+
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
+				State_next <= readState;
 				
 			elsif (regCtrlFlag = "001") then
-				nxtCtrlFlag <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+				Row1LSB_next <= dataR(7 downto 0) & dataR(15 downto 8);
+
 				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
-				
-				nxtRow1(15 downto 0) <= dataR;
-				nxtState <= readState;
+				State_next <= readState;
 
 			elsif (regCtrlFlag = "010") then
-				nxtCtrlFlag <= std_logic_vector(unsigned(regCtrlFlag) + 1);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
-				
-				nxtRow2(31 downto 16) <= dataR;
-				nxtState <= readState;
-			elsif (regCtrlFlag = "011") then
-				nxtCtrlFlag <= std_logic_vector(unsigned(regCtrlFlag) + 1);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
+				Row2MSB_next <= dataR(7 downto 0) & dataR(15 downto 8);
 
-				nxtRow2(15 downto 0) <= dataR;
-				nxtState <= readState;
+				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
+				State_next <= readState;
+
+			elsif (regCtrlFlag = "011") then
+				Row2LSB_next <= dataR(7 downto 0) & dataR(15 downto 8);
+
+				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
+				State_next <= readState;
 
 			elsif (regCtrlFlag = "100") then
-				nxtCtrlFlag <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+				Row3MSB_next <= dataR(7 downto 0) & dataR(15 downto 8);
+
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
+				State_next <= readState;
 
-				nxtRow3(31 downto 16) <= dataR;
-				nxtState <= readState;
 			elsif (regCtrlFlag = "101") then
-				nxtCtrlFlag <= std_logic_vector(unsigned(regCtrlFlag) + 1);				
+				Row3LSB_next <= dataR(7 downto 0) & dataR(15 downto 8);
+			
 				addrAcc_next <= word_t(unsigned(addrAcc) - 351);
-
-				nxtRow3(15 downto 0) <= dataR;
-				nxtState <= invert;
+				State_next <= invert;
 			end if;
 
 		WHEN invert =>
 			nxtRow1 <= not regRow1;
 			nxtRow2 <= not regRow2;
 			nxtRow3 <= not regRow3;
-			nxtCtrlFlag <= (others => '0');
+			CtrlFlag_next <= (others => '0');
 			addrAcc_next <= word_t(unsigned(addrAcc) + 50686);
 			req <= '1';
 			rw <= '0';
-			nxtState <= writeState;
+			State_next <= writeState;
 
 		when writeState =>
 			req <= '1';
 			rw <= '0';
 
 			if (regCtrlFlag = "000") then
-				nxtState <= writeState;
-				nxtCtrlFlag <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+				State_next <= writeState;
+				CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 				
 				dataW <= regRow1(31 downto 16);
 			elsif (regCtrlFlag = "001") then
-				nxtState <= writeState;
-				nxtCtrlFlag <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+				State_next <= writeState;
+				CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
 				
 				dataW <= regRow1(15 downto 0);
 
 			elsif (regCtrlFlag = "010") then
-				nxtState <= writeState;
-				nxtCtrlFlag <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+				State_next <= writeState;
+				CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 				
  				dataW <= regRow2(31 downto 16);
 			elsif (regCtrlFlag = "011") then
-				nxtState <= writeState;
-				nxtCtrlFlag <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+				State_next <= writeState;
+				CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
 
  				dataW <= regRow2(15 downto 0);
 
 			elsif (regCtrlFlag = "100") then
-				nxtState <= writeState;
-				nxtCtrlFlag <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+				State_next <= writeState;
+				CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 
  				dataW <= regRow3(31 downto 16);
 			elsif (regCtrlFlag = "101") then
-				nxtCtrlFlag <= std_logic_vector(unsigned(regCtrlFlag) + 1);				
+				CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);				
 				addrAcc_next <= word_t(unsigned(addrAcc) - 51037);
 
  				dataW <= regRow3(15 downto 0);
- 				nxtState <= decisionState;
+ 				State_next <= decisionState;
 			end if;
 
 		when decisionState =>
 			if (addrAcc = MAX_ADDR) then
 				finish <= '1';
-				nxtState <= idle;
+				State_next <= idle;
 			else
-				nxtState <= readState;
+				State_next <= readState;
 			end if ;
 
 	END CASE;
@@ -212,16 +214,16 @@ begin
 		regRow1 <= (others => '0');
 		regRow2 <= (others => '0');
 		regRow3 <= (others => '0');
-		regCtrlFlag <= nxtCtrlFlag;
+		regCtrlFlag <= CtrlFlag_next;
   elsif rising_edge(clk) then
 		addrAcc <= addrAcc_next;
-		currState <= nxtState;
+		currState <= State_next;
 
-		regRow1 <= nxtMsbRow1 & nxtLsbRow1;
-		regRow2 <= nxtMsbRow2 & nxtLsbRow2;
-		regRow3 <= nxtMsbRow3 & nxtLsbRow3;
+		regRow1 <= Row1MSB_next & Row1LSB_next;
+		regRow2 <= Row2MSB_next & Row2LSB_next;
+		regRow3 <= Row3MSB_next & Row3LSB_next;
 
-		regCtrlFlag <= nxtCtrlFlag;
+		regCtrlFlag <= CtrlFlag_next;
   end if;
 end process myprocess;
 

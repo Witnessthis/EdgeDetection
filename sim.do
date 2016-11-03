@@ -27,7 +27,7 @@ add wave -label finish			/testbench/finish
 add wave -label inPixReg 		/testbench/Accelerator/inPixReg
 #add wave -label inPixReg_next 	/testbench/Accelerator/inPixReg_next
 add wave -label outPixReg 		/testbench/Accelerator/outPixReg
-#add wave -label outPixReg_next 	/testbench/Accelerator/outPixReg_next
+#add wave -label outPixReg_next /testbench/Accelerator/outPixReg_next
 add wave -label addrAcc 		/testbench/Accelerator/addrAcc
 #add wave -label addrAcc_next 	/testbench/Accelerator/addrAcc_next
 add wave -label s_state 		/testbench/Accelerator/s_state
