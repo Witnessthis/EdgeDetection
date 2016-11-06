@@ -65,7 +65,7 @@ signal regCtrlFlag, CtrlFlag_next : std_logic_vector(2 downto 0);
 
 BEGIN
 
-control_loop : PROCESS(currState, start, addrAcc)
+control_loop : PROCESS(currState, start, addrAcc, regCtrlFlag, CtrlFlag_next, regRow1, regRow2, regRow3)
 BEGIN
 	
 	finish <= '0';
@@ -74,7 +74,7 @@ BEGIN
 
 	dataW <= (others => '0');
 	addr <= addrAcc;
-
+	State_next <= idle;
 	addrAcc_next <= addrAcc;
 	CtrlFlag_next <= regCtrlFlag;
 	Row1MSB_next <= regRow1(31 downto 16);
@@ -211,7 +211,7 @@ begin
 		regRow1 <= (others => '0');
 		regRow2 <= (others => '0');
 		regRow3 <= (others => '0');
-		regCtrlFlag <= CtrlFlag_next;
+		regCtrlFlag <= (others => '0');
   elsif rising_edge(clk) then
 		addrAcc <= addrAcc_next;
 		currState <= State_next;
