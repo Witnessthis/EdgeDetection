@@ -169,22 +169,22 @@ BEGIN
 				
 
 			elsif (regCtrlFlag = "010") then
- 				dataW(15 downto 0) <= regRow1(23 downto 16) & regRow1(31 downto 24);
+ 				dataW(15 downto 0) <= regRow2(23 downto 16) & regRow2(31 downto 24);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 				State_next <= writeState;
 				
 			elsif (regCtrlFlag = "011") then
- 				dataW(15 downto 0) <= regRow2(7 downto 0) & regRow1(15 downto 8);
+ 				dataW(15 downto 0) <= regRow2(7 downto 0) & regRow2(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
 				State_next <= writeState;
 
 			elsif (regCtrlFlag = "100") then
- 				dataW(15 downto 0) <= regRow1(23 downto 16) & regRow1(31 downto 24);
+ 				dataW(15 downto 0) <= regRow3(23 downto 16) & regRow3(31 downto 24);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
 				State_next <= writeState;
 
 			elsif (regCtrlFlag = "101") then
- 				dataW(15 downto 0) <= regRow3(7 downto 0) & regRow1(15 downto 8);
+ 				dataW(15 downto 0) <= regRow3(7 downto 0) & regRow3(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) - 51039);
  				State_next <= decisionState;
 			end if;
