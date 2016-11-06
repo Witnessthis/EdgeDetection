@@ -18,14 +18,16 @@
 
 view wave
 
-add wave -group testbench_signals -label clk	/testbench/clk
+add wave -label clk	/testbench/clk
+
 add wave -group testbench_signals -label reset	/testbench/reset
 add wave -group testbench_signals -label start	/testbench/start
 add wave -group testbench_signals -label finish	/testbench/finish
 
+add wave -group ram_dataR -label dataR		 /testbench/dataR
+add wave -group ram_dataW -label dataW		 /testbench/dataW
+
 add wave -group ram_signals -decimal -label addr /testbench/addr
-add wave -group ram_signals -label dataR		 /testbench/dataR
-add wave -group ram_signals -label dataW		 /testbench/dataW
 add wave -group ram_signals -label req			 /testbench/req
 add wave -group ram_signals -label rw			 /testbench/rw
 
