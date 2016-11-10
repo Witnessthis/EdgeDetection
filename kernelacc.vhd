@@ -51,27 +51,28 @@ ARCHITECTURE structure OF acc IS
 -- All internal signals are defined here
 -- MaxAddr = ((352*288)/2)-1 = 50687
 -- StartWriteAddress = 50688
-type state_type IS (idle, readState, writeState, invert, decisionState);
+type state_type IS (idle, readStateMSB, readStateLSB, writeState, invert, decisionState);
 
 constant IMG_ADDR_OOB : word_t := word_t(to_unsigned(50688, 32));
 constant START_WRITE_ADDR : word_t := word_t(to_unsigned(50688, 32));
+constant STRIDE_SIZE : byte_t := byte_t(to_unsigned(175, 8));
 
 signal addrAcc, addrAcc_next : word_t;
 signal currState, State_next : state_type;
 signal regRow1, regRow2, regRow3 : word_t;
 signal Row1MSB_next, Row1LSB_next, Row2MSB_next, Row2LSB_next, Row3MSB_next, Row3LSB_next : halfword_t;
 signal regCtrlFlag, CtrlFlag_next : std_logic_vector(2 downto 0);
-
+signal strideCounter, strideCounter_next : byte_t;
 
 BEGIN
 
-control_loop : PROCESS(currState, start, addrAcc, regCtrlFlag, CtrlFlag_next, regRow1, regRow2, regRow3)
+control_loop : PROCESS(currState, start, addrAcc, regCtrlFlag, CtrlFlag_next, regRow1, regRow2, regRow3, dataR, strideCounter, strideCounter_next)
 BEGIN
 	
 	finish <= '0';
 	req <= '0';
 	rw <= '0';
-
+	strideCounter_next <= strideCounter;
 	dataW <= (others => '0');
 	addr <= addrAcc;
 	State_next <= idle;
@@ -89,55 +90,56 @@ BEGIN
 			addrAcc_next <= (others => '0');
 			CtrlFlag_next <= (others => '0');
 			if start = '1' then  
-				State_next <= readState;
+				State_next <= readStateMSB;
 			else
 				State_next <= idle;
 			end if;
 
-		WHEN readState =>
+		WHEN readStateMSB =>
 			req <= '1';
 			rw <= '1';
 			CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
 
 			if (regCtrlFlag = "000") then
-				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
-				State_next <= readState;
+				Row1MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				addrAcc_next <= word_t(unsigned(addrAcc) + 176);
+				State_next <= readStateMSB;
 
 			elsif (regCtrlFlag = "001") then
-				Row1MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
-				State_next <= readState;
-				
-			elsif (regCtrlFlag = "010") then
-				Row1LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
-
-				State_next <= readState;
-
-			elsif (regCtrlFlag = "011") then
 				Row2MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
+				addrAcc_next <= word_t(unsigned(addrAcc) + 176);
+				State_next <= readStateMSB;
 
-				State_next <= readState;
-
-			elsif (regCtrlFlag = "100") then
-				Row2LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
-
-				State_next <= readState;
-
-			elsif (regCtrlFlag = "101") then
+			elsif (regCtrlFlag = "010") then
 				Row3MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) - 351);
+				State_next <= readStateLSB;
+				CtrlFlag_next <= (others => '0');
 
-				State_next <= readState;
-
-			elsif (regCtrlFlag = "110") then
-				req <= '0';
-				Row3LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-
-				State_next <= invert;
 			end if;
+
+		WHEN readStateLSB =>
+			req <= '1';
+			rw <= '1';
+			CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+			
+			if (regCtrlFlag = "000") then
+				Row1LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				addrAcc_next <= word_t(unsigned(addrAcc) + 176);
+				State_next <= readStateLSB;
+
+			elsif (regCtrlFlag = "001") then
+				Row2LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				addrAcc_next <= word_t(unsigned(addrAcc) + 176);
+				State_next <= readStateLSB;
+
+			elsif (regCtrlFlag = "010") then
+				Row3LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				addrAcc_next <= word_t(unsigned(addrAcc) - 351);
+				State_next <= invert;
+				strideCounter_next <= byte_t(unsigned(strideCounter)+1);
+			end if;
+		
 
 		WHEN invert =>
 
@@ -190,11 +192,19 @@ BEGIN
 			end if;
 
 		when decisionState =>
-			if (addrAcc = IMG_ADDR_OOB) then
+			if (addrAcc > IMG_ADDR_OOB) then
 				finish <= '1';
 				State_next <= idle;
+			elsif(strideCounter = STRIDE_SIZE) then
+				strideCounter_next <= (others => '0');
+				CtrlFlag_next <= (others => '0');
+				State_next <= readStateMSB;
 			else
-				State_next <= readState;
+				Row1MSB_next <= regRow1(15 downto 0);
+				Row2MSB_next <= regRow2(15 downto 0);
+				Row3MSB_next <= regRow3(15 downto 0);
+
+				State_next <= readStateLSB;
 				CtrlFlag_next <= (others => '0');
 			end if ;
 
@@ -207,7 +217,7 @@ begin
   if reset = '1' then
 		addrAcc <= (others => '0');
 		currState <= idle;
-
+		strideCounter <= (others => '0');
 		regRow1 <= (others => '0');
 		regRow2 <= (others => '0');
 		regRow3 <= (others => '0');
@@ -215,6 +225,7 @@ begin
   elsif rising_edge(clk) then
 		addrAcc <= addrAcc_next;
 		currState <= State_next;
+		strideCounter <= strideCounter_next;
 
 		regRow1(31 downto 0) <= Row1MSB_next & Row1LSB_next;
 		regRow2(31 downto 0) <= Row2MSB_next & Row2LSB_next;

@@ -54,6 +54,10 @@ add wave -group frame_signals -divider states
 add wave -group frame_signals -label currState 	/testbench/Accelerator/currState
 add wave -group frame_signals -label State_next	/testbench/Accelerator/State_next
 
+add wave -divider TempGroup
+add wave -label strideCounter 	/testbench/Accelerator/strideCounter
+add wave -label strideCounter_next	/testbench/Accelerator/strideCounter_next
+
 run 3000ms
 
 # WaveRestoreZoom changes the wave view to show the simulated time
