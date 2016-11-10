@@ -54,6 +54,38 @@ add wave -group frame_signals -divider states
 add wave -group frame_signals -label currState 	/testbench/Accelerator/currState
 add wave -group frame_signals -label State_next	/testbench/Accelerator/State_next
 
+add wave -group sobel_signals 
+add wave -group sobel_signals -divider As_Signals
+add wave -group sobel_signals -label As11   /testbench/Accelerator/As11
+add wave -group sobel_signals -label As12   /testbench/Accelerator/As12
+add wave -group sobel_signals -label As13   /testbench/Accelerator/As13
+add wave -group sobel_signals -label As21   /testbench/Accelerator/As21
+add wave -group sobel_signals -label As23   /testbench/Accelerator/As23
+add wave -group sobel_signals -label As31   /testbench/Accelerator/As31
+add wave -group sobel_signals -label As32   /testbench/Accelerator/As32
+add wave -group sobel_signals -label As33   /testbench/Accelerator/As33
+add wave -group sobel_signals -divider Bs_Signals
+add wave -group sobel_signals -label Bs11   /testbench/Accelerator/Bs11
+add wave -group sobel_signals -label Bs12   /testbench/Accelerator/Bs12
+add wave -group sobel_signals -label Bs13   /testbench/Accelerator/Bs13
+add wave -group sobel_signals -label Bs21   /testbench/Accelerator/Bs21
+add wave -group sobel_signals -label Bs23   /testbench/Accelerator/Bs23
+add wave -group sobel_signals -label Bs31   /testbench/Accelerator/Bs31
+add wave -group sobel_signals -label Bs32   /testbench/Accelerator/Bs32
+add wave -group sobel_signals -label Bs33   /testbench/Accelerator/Bs33
+add wave -group sobel_signals -divider THE_D
+add wave -group sobel_signals -label D1   /testbench/Accelerator/D1
+add wave -group sobel_signals -label D2   /testbench/Accelerator/D2
+add wave -group sobel_signals -divider intermediate
+add wave -group sobel_signals -label sub1   /testbench/Accelerator/sub1
+add wave -group sobel_signals -label sub2   /testbench/Accelerator/sub2
+add wave -group sobel_signals -label sub3   /testbench/Accelerator/sub3
+add wave -group sobel_signals -label sub4   /testbench/Accelerator/sub4
+add wave -group sobel_signals -label sub5   /testbench/Accelerator/sub5
+add wave -group sobel_signals -label sub6   /testbench/Accelerator/sub6
+add wave -group sobel_signals -label add1   /testbench/Accelerator/add1
+add wave -group sobel_signals -label add2   /testbench/Accelerator/add2
+
 add wave -divider TempGroup
 add wave -label strideCounter 	/testbench/Accelerator/strideCounter
 add wave -label strideCounter_next	/testbench/Accelerator/strideCounter_next

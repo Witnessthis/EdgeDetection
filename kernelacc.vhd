@@ -15,7 +15,7 @@
 --             :  1.2   12-10-11     Changed from std_loigc_arith to numeric_std
 --             :  
 --  Special    :
---  thanks to  :  Niels Haandbæk -- c958307@student.dtu.dk
+--  thanks to  :  Niels HaandbÃ¦k -- c958307@student.dtu.dk
 --             :  Michael Kristensen -- c973396@student.dtu.dk
 --
 -- -----------------------------------------------------------------------------
@@ -63,7 +63,9 @@ signal regRow1, regRow2, regRow3 : word_t;
 signal Row1MSB_next, Row1LSB_next, Row2MSB_next, Row2LSB_next, Row3MSB_next, Row3LSB_next : halfword_t;
 signal regCtrlFlag, CtrlFlag_next : std_logic_vector(2 downto 0);
 signal strideCounter, strideCounter_next : byte_t;
-
+signal D1, D2 : halfword_t;
+signal As11, As12, As13, As21, As23, As31, As32, As33, Bs11, Bs12, Bs13, Bs21, Bs23, Bs31, Bs32, Bs33 : signed(15 downto 0);
+signal sub1, sub2, sub3, sub4, sub5, sub6, add1, add2 :signed(15 downto 0);
 BEGIN
 
 control_loop : PROCESS(currState, start, addrAcc, regCtrlFlag, CtrlFlag_next, regRow1, regRow2, regRow3, dataR, strideCounter, strideCounter_next)
@@ -143,12 +145,30 @@ BEGIN
 
 		WHEN invert =>
 
-			Row1MSB_next <= not regRow1(31 downto 16);
-			Row1LSB_next <= not regRow1(15 downto 0);
-			Row2MSB_next <= not regRow2(31 downto 16);
-			Row2LSB_next <= not regRow2(15 downto 0);
-			Row3MSB_next <= not regRow3(31 downto 16);
-			Row3LSB_next <= not regRow3(15 downto 0);
+			As11 <= signed("00000000" & regRow1(31 downto 24)); 
+			As12 <= signed("00000000" & regRow1(23 downto 16)); 
+			As13 <= signed("00000000" & regRow1(15 downto 8)); 
+			--As21 <= shift_left(signed("00000000" & regRow2(31 downto 24)), 1);
+			--As23 <= shift_left(signed("00000000" & regRow2(15 downto 8)), 1); 
+			As21 <= signed("00000000" & regRow2(31 downto 24));
+			As23 <= signed("00000000" & regRow2(15 downto 8)); 
+			As31 <= signed("00000000" & regRow3(31 downto 24)); 
+			As32 <= signed("00000000" & regRow3(23 downto 16)); 
+			As33 <= signed("00000000" & regRow3(15 downto 8)); 
+
+			Bs11 <= signed("00000000" & regRow1(23 downto 16));
+			--Bs12 <= shift_left(signed("00000000" & regRow1(15 downto 8)), 1);
+			Bs12 <= signed("00000000" & regRow1(15 downto 8));
+			Bs13 <= signed("00000000" & regRow1(7 downto 0));
+			Bs21 <= signed("00000000" & regRow2(23 downto 16));
+			Bs23 <= signed("00000000" & regRow2(7 downto 0));
+			--Bs31 <= shift_left(signed("00000000" & regRow3(23 downto 16)), 1);
+			Bs31 <= signed("00000000" & regRow3(23 downto 16));
+			Bs32 <= signed("00000000" & regRow3(15 downto 8));
+			Bs33 <= signed("00000000" & regRow3(7 downto 0));
+
+			Row2MSB_next(7 downto 0) <= D1(7 downto 0);
+			Row2LSB_next(15 downto 8) <= D2(7 downto 0);
 
 			CtrlFlag_next <= (others => '0');
 			addrAcc_next <= word_t(unsigned(addrAcc) + 50686);
@@ -157,39 +177,44 @@ BEGIN
 		when writeState =>
 			req <= '1';
 			rw <= '0';
-			CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);	
-
-			if (regCtrlFlag = "000") then
-				dataW(15 downto 0) <= regRow1(23 downto 16) & regRow1(31 downto 24);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
-				State_next <= writeState;
+			--CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);	
 				
-			elsif (regCtrlFlag = "001") then
-				dataW(15 downto 0) <= regRow1(7 downto 0) & regRow1(15 downto 8);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
-				State_next <= writeState;
-				
+ 			dataW(15 downto 0) <= regRow2(15 downto 8) & regRow2(23 downto 16);
+			addrAcc_next <= word_t(unsigned(addrAcc) - 50686);
+			State_next <= decisionState;
+			
 
-			elsif (regCtrlFlag = "010") then
- 				dataW(15 downto 0) <= regRow2(23 downto 16) & regRow2(31 downto 24);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
-				State_next <= writeState;
-				
-			elsif (regCtrlFlag = "011") then
- 				dataW(15 downto 0) <= regRow2(7 downto 0) & regRow2(15 downto 8);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
-				State_next <= writeState;
 
-			elsif (regCtrlFlag = "100") then
- 				dataW(15 downto 0) <= regRow3(23 downto 16) & regRow3(31 downto 24);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
-				State_next <= writeState;
-
-			elsif (regCtrlFlag = "101") then
- 				dataW(15 downto 0) <= regRow3(7 downto 0) & regRow3(15 downto 8);
-				addrAcc_next <= word_t(unsigned(addrAcc) - 51039);
- 				State_next <= decisionState;
-			end if;
+--			if (regCtrlFlag = "000") then
+--				dataW(15 downto 0) <= regRow1(23 downto 16) & regRow1(31 downto 24);
+--				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
+--				State_next <= writeState;
+--				
+--			elsif (regCtrlFlag = "001") then
+--				dataW(15 downto 0) <= regRow1(7 downto 0) & regRow1(15 downto 8);
+--				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
+--				State_next <= writeState;
+--				
+--			elsif (regCtrlFlag = "010") then
+-- 				dataW(15 downto 0) <= regRow2(23 downto 16) & regRow2(31 downto 24);
+--				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
+--				State_next <= writeState;
+--				
+--			elsif (regCtrlFlag = "011") then
+-- 				dataW(15 downto 0) <= regRow2(7 downto 0) & regRow2(15 downto 8);
+--				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
+--				State_next <= writeState;
+--
+--			elsif (regCtrlFlag = "100") then
+-- 				dataW(15 downto 0) <= regRow3(23 downto 16) & regRow3(31 downto 24);
+--				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
+--				State_next <= writeState;
+--
+--			elsif (regCtrlFlag = "101") then
+-- 				dataW(15 downto 0) <= regRow3(7 downto 0) & regRow3(15 downto 8);
+--				addrAcc_next <= word_t(unsigned(addrAcc) - 51039);
+-- 				State_next <= decisionState;
+--			end if;
 
 		when decisionState =>
 			if (addrAcc > IMG_ADDR_OOB) then
@@ -210,6 +235,26 @@ BEGIN
 
 	END CASE;
 END PROCESS control_loop;
+
+
+
+--sub1 <= As13 - As11;
+--sub2 <= As23 - As21;
+--sub3 <= As33 - As31;
+--sub4 <= As11 - As31;
+--sub5 <= Bs12 - Bs32;
+--sub6 <= As13 - As33;
+--
+add1 <= shift_left((As23 - As21), 1);
+add2 <= shift_left((As12 - As32), 1);
+
+--D1 <= halfword_t( abs(add1) + abs(add2) );
+--D1 <= halfword_t( abs(As13 - As11 + (As23 - As21) + As33 - As31) + abs(As11 - As31 + (As12 - As32) + As13 - As33) );
+D1 <= halfword_t( abs(As13 - As11 + add1 + As33 - As31) + abs(As11 - As31 + add2 + As13 - As33) );
+D2 <= halfword_t( abs(Bs13 - Bs11 + (Bs23 - Bs21) + Bs33 - Bs31) + abs(Bs11 - Bs31 + (Bs12 - Bs32) + Bs13 - Bs33) );
+--D1 <= byte_t(As13 - As11);
+--D2 <= byte_t(Bs13 - Bs11);
+
 
 --Template for a process
 myprocess: process(clk,reset)
