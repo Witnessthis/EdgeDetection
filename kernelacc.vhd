@@ -51,7 +51,7 @@ ARCHITECTURE structure OF acc IS
 -- All internal signals are defined here
 -- MaxAddr = ((352*288)/2)-1 = 50687
 -- StartWriteAddress = 50688
-type state_type IS (idle, readStateMSB, readStateLSB, writeState, invert, decisionState);
+type state_type IS (idle, readStateMSB, readStateLSB, writeState, invert, decisionState, waitForInvert);
 
 constant IMG_ADDR_OOB : word_t := word_t(to_unsigned(50688, 32));
 constant START_WRITE_ADDR : word_t := word_t(to_unsigned(50688, 32));
@@ -60,12 +60,13 @@ constant STRIDE_SIZE : byte_t := byte_t(to_unsigned(175, 8));
 signal addrAcc, addrAcc_next : word_t;
 signal currState, State_next : state_type;
 signal regRow1, regRow2, regRow3 : word_t;
+signal newPixelReg, newPixelReg_next : halfword_t;
 signal Row1MSB_next, Row1LSB_next, Row2MSB_next, Row2LSB_next, Row3MSB_next, Row3LSB_next : halfword_t;
 signal regCtrlFlag, CtrlFlag_next : std_logic_vector(2 downto 0);
 signal strideCounter, strideCounter_next : byte_t;
 signal D1, D2 : halfword_t;
 signal As11, As12, As13, As21, As23, As31, As32, As33, Bs11, Bs12, Bs13, Bs21, Bs23, Bs31, Bs32, Bs33 : signed(15 downto 0);
-signal sub1, sub2, sub3, sub4, sub5, sub6, add1, add2 :signed(15 downto 0);
+signal sub1, sub2, sub3, sub4, sub5, sub6, Aadd1, Aadd2, Badd1, Badd2 :signed(15 downto 0);
 BEGIN
 
 control_loop : PROCESS(currState, start, addrAcc, regCtrlFlag, CtrlFlag_next, regRow1, regRow2, regRow3, dataR, strideCounter, strideCounter_next)
@@ -86,6 +87,7 @@ BEGIN
 	Row2LSB_next <= regRow2(15 downto 0);
 	Row3MSB_next <= regRow3(31 downto 16);
 	Row3LSB_next <= regRow3(15 downto 0);
+	newPixelReg_next <= newPixelReg;
 	
 	CASE (currState) IS
 		WHEN idle =>
@@ -167,8 +169,34 @@ BEGIN
 			Bs32 <= signed("00000000" & regRow3(15 downto 8));
 			Bs33 <= signed("00000000" & regRow3(7 downto 0));
 
-			Row2MSB_next(7 downto 0) <= D1(7 downto 0);
-			Row2LSB_next(15 downto 8) <= D2(7 downto 0);
+			State_next <= waitForInvert;
+
+		WHEN waitForInvert =>
+
+			if D1 > X"00FF" then
+			    --Row2MSB_next(7 downto 0) <= X"FF";
+				newPixelReg_next(15 downto 8) <= X"FF";
+			elsif signed(D1) < 0 then
+				newPixelReg_next(15 downto 8) <= X"00";
+			else
+				--Row2MSB_next(7 downto 0) <= D1(7 downto 0);
+				newPixelReg_next(15 downto 8) <= D1(7 downto 0);
+			end if;
+
+			if D2 > X"00FF" then
+				--Row2LSB_next(15 downto 8) <= X"FF";
+				newPixelReg_next(7 downto 0) <= X"FF";
+			elsif signed(D2) < 0 then
+				newPixelReg_next(7 downto 0) <= X"00";
+			else
+				--Row2LSB_next(15 downto 8) <= D2(7 downto 0);
+				newPixelReg_next(7 downto 0) <= D2(7 downto 0);
+			end if;
+
+
+
+--			Row2MSB_next(7 downto 0) <= D1(7 downto 0);
+--			Row2LSB_next(15 downto 8) <= D2(7 downto 0);
 
 			CtrlFlag_next <= (others => '0');
 			addrAcc_next <= word_t(unsigned(addrAcc) + 50686);
@@ -179,7 +207,8 @@ BEGIN
 			rw <= '0';
 			--CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);	
 				
- 			dataW(15 downto 0) <= regRow2(15 downto 8) & regRow2(23 downto 16);
+ 			--dataW(15 downto 0) <= regRow2(15 downto 8) & regRow2(23 downto 16);
+ 			dataW(15 downto 0) <= newPixelReg(7 downto 0) & newPixelReg(15 downto 8);
 			addrAcc_next <= word_t(unsigned(addrAcc) - 50686);
 			State_next <= decisionState;
 			
@@ -245,13 +274,15 @@ END PROCESS control_loop;
 --sub5 <= Bs12 - Bs32;
 --sub6 <= As13 - As33;
 --
-add1 <= shift_left((As23 - As21), 1);
-add2 <= shift_left((As12 - As32), 1);
+Aadd1 <= shift_left((As23 - As21), 1);
+Aadd2 <= shift_left((As12 - As32), 1);
+Badd1 <= shift_left((Bs23 - Bs21), 1);
+Badd2 <= shift_left((Bs12 - Bs32), 1);
 
---D1 <= halfword_t( abs(add1) + abs(add2) );
+--D1 <= halfword_t( abs(Aadd1) + abs(Aadd2) );
 --D1 <= halfword_t( abs(As13 - As11 + (As23 - As21) + As33 - As31) + abs(As11 - As31 + (As12 - As32) + As13 - As33) );
-D1 <= halfword_t( abs(As13 - As11 + add1 + As33 - As31) + abs(As11 - As31 + add2 + As13 - As33) );
-D2 <= halfword_t( abs(Bs13 - Bs11 + (Bs23 - Bs21) + Bs33 - Bs31) + abs(Bs11 - Bs31 + (Bs12 - Bs32) + Bs13 - Bs33) );
+D1 <= halfword_t( abs(As13 - As11 + Aadd1 + As33 - As31) + abs(As11 - As31 + Aadd2 + As13 - As33) );
+D2 <= halfword_t( abs(Bs13 - Bs11 + Badd1 + Bs33 - Bs31) + abs(Bs11 - Bs31 + Badd2 + Bs13 - Bs33) );
 --D1 <= byte_t(As13 - As11);
 --D2 <= byte_t(Bs13 - Bs11);
 
@@ -275,6 +306,7 @@ begin
 		regRow1(31 downto 0) <= Row1MSB_next & Row1LSB_next;
 		regRow2(31 downto 0) <= Row2MSB_next & Row2LSB_next;
 		regRow3(31 downto 0) <= Row3MSB_next & Row3LSB_next;
+		newPixelReg <= newPixelReg_next;
 
 		regCtrlFlag <= CtrlFlag_next;
   end if;
