@@ -64,7 +64,7 @@ signal newPixelReg, newPixelReg_next : halfword_t;
 signal Row1MSB_next, Row1LSB_next, Row2MSB_next, Row2LSB_next, Row3MSB_next, Row3LSB_next : halfword_t;
 signal regCtrlFlag, CtrlFlag_next : std_logic_vector(2 downto 0);
 signal strideCounter, strideCounter_next : byte_t;
-signal D1, D2 : halfword_t;
+signal D1, D2, D1Shifted, D2Shifted : halfword_t;
 signal As11, As12, As13, As21, As23, As31, As32, As33, Bs11, Bs12, Bs13, Bs21, Bs23, Bs31, Bs32, Bs33 : signed(15 downto 0);
 signal sub1, sub2, sub3, sub4, sub5, sub6, Aadd1, Aadd2, Badd1, Badd2 :signed(15 downto 0);
 BEGIN
@@ -173,27 +173,30 @@ BEGIN
 
 		WHEN waitForInvert =>
 
-			if D1 > X"00FF" then
-			    --Row2MSB_next(7 downto 0) <= X"FF";
-				newPixelReg_next(15 downto 8) <= X"FF";
-			elsif signed(D1) < 0 then
-				newPixelReg_next(15 downto 8) <= X"00";
-			else
-				--Row2MSB_next(7 downto 0) <= D1(7 downto 0);
-				newPixelReg_next(15 downto 8) <= D1(7 downto 0);
-			end if;
-
-			if D2 > X"00FF" then
-				--Row2LSB_next(15 downto 8) <= X"FF";
-				newPixelReg_next(7 downto 0) <= X"FF";
-			elsif signed(D2) < 0 then
-				newPixelReg_next(7 downto 0) <= X"00";
-			else
-				--Row2LSB_next(15 downto 8) <= D2(7 downto 0);
-				newPixelReg_next(7 downto 0) <= D2(7 downto 0);
-			end if;
 
 
+			--if unsigned(D1) > X"00FF" then
+			--    --Row2MSB_next(7 downto 0) <= X"FF";
+			--	newPixelReg_next(15 downto 8) <= X"FF";
+			--elsif signed(D1) < 0 then
+			--	newPixelReg_next(15 downto 8) <= X"00";
+			--else
+			--	--Row2MSB_next(7 downto 0) <= D1(7 downto 0);
+			--	newPixelReg_next(15 downto 8) <= D1Shifted(7 downto 0);
+			--end if;
+--
+			--if unsigned(D2) > X"00FF" then
+			--	--Row2LSB_next(15 downto 8) <= X"FF";
+			--	newPixelReg_next(7 downto 0) <= X"FF";
+			--elsif signed(D2) < 0 then
+			--	newPixelReg_next(7 downto 0) <= X"00";
+			--else
+			--	--Row2LSB_next(15 downto 8) <= D2(7 downto 0);
+			--	newPixelReg_next(7 downto 0) <= D2Shifted(7 downto 0);
+			--end if;
+
+			newPixelReg_next(15 downto 8) <= D1Shifted(7 downto 0);
+			newPixelReg_next(7 downto 0) <= D2Shifted(7 downto 0);
 
 --			Row2MSB_next(7 downto 0) <= D1(7 downto 0);
 --			Row2LSB_next(15 downto 8) <= D2(7 downto 0);
@@ -285,7 +288,8 @@ D1 <= halfword_t( abs(As13 - As11 + Aadd1 + As33 - As31) + abs(As11 - As31 + Aad
 D2 <= halfword_t( abs(Bs13 - Bs11 + Badd1 + Bs33 - Bs31) + abs(Bs11 - Bs31 + Badd2 + Bs13 - Bs33) );
 --D1 <= byte_t(As13 - As11);
 --D2 <= byte_t(Bs13 - Bs11);
-
+D1Shifted <= halfword_t(shift_right(signed(D1), 3));
+D2Shifted <= halfword_t(shift_right(signed(D2), 3));
 
 --Template for a process
 myprocess: process(clk,reset)
