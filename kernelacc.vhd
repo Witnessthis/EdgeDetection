@@ -92,20 +92,17 @@ BEGIN
 	As11 <= signed("00000000" & regRow1(31 downto 24)); 
 	As12 <= signed("00000000" & regRow1(23 downto 16)); 
 	As13 <= signed("00000000" & regRow1(15 downto 8)); 
-	--As21 <= shift_left(signed("00000000" & regRow2(31 downto 24)), 1);
-	--As23 <= shift_left(signed("00000000" & regRow2(15 downto 8)), 1); 
 	As21 <= signed("00000000" & regRow2(31 downto 24));
 	As23 <= signed("00000000" & regRow2(15 downto 8)); 
 	As31 <= signed("00000000" & regRow3(31 downto 24)); 
 	As32 <= signed("00000000" & regRow3(23 downto 16)); 
 	As33 <= signed("00000000" & regRow3(15 downto 8));
+	
 	Bs11 <= signed("00000000" & regRow1(23 downto 16));
-	--Bs12 <= shift_left(signed("00000000" & regRow1(15 downto 8)), 1);
 	Bs12 <= signed("00000000" & regRow1(15 downto 8));
 	Bs13 <= signed("00000000" & regRow1(7 downto 0));
 	Bs21 <= signed("00000000" & regRow2(23 downto 16));
 	Bs23 <= signed("00000000" & regRow2(7 downto 0));
-	--Bs31 <= shift_left(signed("00000000" & regRow3(23 downto 16)), 1);
 	Bs31 <= signed("00000000" & regRow3(23 downto 16));
 	Bs32 <= signed("00000000" & regRow3(15 downto 8));
 	Bs33 <= signed("00000000" & regRow3(7 downto 0));
@@ -171,8 +168,6 @@ BEGIN
 			As11 <= signed("00000000" & regRow1(31 downto 24)); 
 			As12 <= signed("00000000" & regRow1(23 downto 16)); 
 			As13 <= signed("00000000" & regRow1(15 downto 8)); 
-			--As21 <= shift_left(signed("00000000" & regRow2(31 downto 24)), 1);
-			--As23 <= shift_left(signed("00000000" & regRow2(15 downto 8)), 1); 
 			As21 <= signed("00000000" & regRow2(31 downto 24));
 			As23 <= signed("00000000" & regRow2(15 downto 8)); 
 			As31 <= signed("00000000" & regRow3(31 downto 24)); 
@@ -180,12 +175,10 @@ BEGIN
 			As33 <= signed("00000000" & regRow3(15 downto 8)); 
 
 			Bs11 <= signed("00000000" & regRow1(23 downto 16));
-			--Bs12 <= shift_left(signed("00000000" & regRow1(15 downto 8)), 1);
 			Bs12 <= signed("00000000" & regRow1(15 downto 8));
 			Bs13 <= signed("00000000" & regRow1(7 downto 0));
 			Bs21 <= signed("00000000" & regRow2(23 downto 16));
 			Bs23 <= signed("00000000" & regRow2(7 downto 0));
-			--Bs31 <= shift_left(signed("00000000" & regRow3(23 downto 16)), 1);
 			Bs31 <= signed("00000000" & regRow3(23 downto 16));
 			Bs32 <= signed("00000000" & regRow3(15 downto 8));
 			Bs33 <= signed("00000000" & regRow3(7 downto 0));
@@ -195,32 +188,8 @@ BEGIN
 		WHEN waitForInvert =>
 
 
-
-			--if unsigned(D1) > X"00FF" then
-			--    --Row2MSB_next(7 downto 0) <= X"FF";
-			--	newPixelReg_next(15 downto 8) <= X"FF";
-			--elsif signed(D1) < 0 then
-			--	newPixelReg_next(15 downto 8) <= X"00";
-			--else
-			--	--Row2MSB_next(7 downto 0) <= D1(7 downto 0);
-			--	newPixelReg_next(15 downto 8) <= D1Shifted(7 downto 0);
-			--end if;
---
-			--if unsigned(D2) > X"00FF" then
-			--	--Row2LSB_next(15 downto 8) <= X"FF";
-			--	newPixelReg_next(7 downto 0) <= X"FF";
-			--elsif signed(D2) < 0 then
-			--	newPixelReg_next(7 downto 0) <= X"00";
-			--else
-			--	--Row2LSB_next(15 downto 8) <= D2(7 downto 0);
-			--	newPixelReg_next(7 downto 0) <= D2Shifted(7 downto 0);
-			--end if;
-
 			newPixelReg_next(15 downto 8) <= D1Shifted(7 downto 0);
 			newPixelReg_next(7 downto 0) <= D2Shifted(7 downto 0);
-
---			Row2MSB_next(7 downto 0) <= D1(7 downto 0);
---			Row2LSB_next(15 downto 8) <= D2(7 downto 0);
 
 			CtrlFlag_next <= (others => '0');
 			addrAcc_next <= word_t(unsigned(addrAcc) + 50863);
@@ -229,45 +198,10 @@ BEGIN
 		when writeState =>
 			req <= '1';
 			rw <= '0';
-			--CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);	
-				
- 			--dataW(15 downto 0) <= regRow2(15 downto 8) & regRow2(23 downto 16);
+
  			dataW(15 downto 0) <= newPixelReg(7 downto 0) & newPixelReg(15 downto 8);
 			addrAcc_next <= word_t(unsigned(addrAcc) - 50863);
 			State_next <= decisionState;
-			
-
-
---			if (regCtrlFlag = "000") then
---				dataW(15 downto 0) <= regRow1(23 downto 16) & regRow1(31 downto 24);
---				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
---				State_next <= writeState;
---				
---			elsif (regCtrlFlag = "001") then
---				dataW(15 downto 0) <= regRow1(7 downto 0) & regRow1(15 downto 8);
---				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
---				State_next <= writeState;
---				
---			elsif (regCtrlFlag = "010") then
--- 				dataW(15 downto 0) <= regRow2(23 downto 16) & regRow2(31 downto 24);
---				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
---				State_next <= writeState;
---				
---			elsif (regCtrlFlag = "011") then
--- 				dataW(15 downto 0) <= regRow2(7 downto 0) & regRow2(15 downto 8);
---				addrAcc_next <= word_t(unsigned(addrAcc) + 175);
---				State_next <= writeState;
---
---			elsif (regCtrlFlag = "100") then
--- 				dataW(15 downto 0) <= regRow3(23 downto 16) & regRow3(31 downto 24);
---				addrAcc_next <= word_t(unsigned(addrAcc) + 1);
---				State_next <= writeState;
---
---			elsif (regCtrlFlag = "101") then
--- 				dataW(15 downto 0) <= regRow3(7 downto 0) & regRow3(15 downto 8);
---				addrAcc_next <= word_t(unsigned(addrAcc) - 51039);
--- 				State_next <= decisionState;
---			end if;
 
 		when decisionState =>
 			if (addrAcc > IMG_ADDR_OOB) then
@@ -289,30 +223,17 @@ BEGIN
 	END CASE;
 END PROCESS control_loop;
 
-
-
---sub1 <= As13 - As11;
---sub2 <= As23 - As21;
---sub3 <= As33 - As31;
---sub4 <= As11 - As31;
---sub5 <= Bs12 - Bs32;
---sub6 <= As13 - As33;
---
 Aadd1 <= shift_left((As23 - As21), 1);
 Aadd2 <= shift_left((As12 - As32), 1);
 Badd1 <= shift_left((Bs23 - Bs21), 1);
 Badd2 <= shift_left((Bs12 - Bs32), 1);
 
---D1 <= halfword_t( abs(Aadd1) + abs(Aadd2) );
---D1 <= halfword_t( abs(As13 - As11 + (As23 - As21) + As33 - As31) + abs(As11 - As31 + (As12 - As32) + As13 - As33) );
 D1 <= halfword_t( abs(As13 - As11 + Aadd1 + As33 - As31) + abs(As11 - As31 + Aadd2 + As13 - As33) );
 D2 <= halfword_t( abs(Bs13 - Bs11 + Badd1 + Bs33 - Bs31) + abs(Bs11 - Bs31 + Badd2 + Bs13 - Bs33) );
---D1 <= byte_t(As13 - As11);
---D2 <= byte_t(Bs13 - Bs11);
+
 D1Shifted <= halfword_t(shift_right(signed(D1), 3));
 D2Shifted <= halfword_t(shift_right(signed(D2), 3));
 
---Template for a process
 myprocess: process(clk,reset)
 begin
   if reset = '1' then
