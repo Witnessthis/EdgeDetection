@@ -1,4 +1,6 @@
 work/
 EdgeDetection/
+SobelAccelerator/
+inputoutput/
 pic1.pgm16.bits_result.pgm
 *.wlf

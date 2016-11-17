@@ -53,7 +53,7 @@ ARCHITECTURE structure OF acc IS
 -- StartWriteAddress = 50688
 type state_type IS (idle, readStateMSB, readStateLSB, writeState, invert, decisionState, waitForInvert);
 
-constant IMG_ADDR_OOB : word_t := word_t(to_unsigned(50688, 32));
+constant IMG_ADDR_OOB : word_t := word_t(to_unsigned(50337, 32));
 constant START_WRITE_ADDR : word_t := word_t(to_unsigned(50688, 32));
 constant STRIDE_SIZE : byte_t := byte_t(to_unsigned(175, 8));
 
@@ -62,14 +62,14 @@ signal currState, State_next : state_type;
 signal regRow1, regRow2, regRow3 : word_t;
 signal newPixelReg, newPixelReg_next : halfword_t;
 signal Row1MSB_next, Row1LSB_next, Row2MSB_next, Row2LSB_next, Row3MSB_next, Row3LSB_next : halfword_t;
-signal regCtrlFlag, CtrlFlag_next : std_logic_vector(2 downto 0);
+signal regCtrlFlag, CtrlFlag_next : std_logic_vector(1 downto 0);
 signal strideCounter, strideCounter_next : byte_t;
 signal D1, D2, D1Shifted, D2Shifted : halfword_t;
 signal As11, As12, As13, As21, As23, As31, As32, As33, Bs11, Bs12, Bs13, Bs21, Bs23, Bs31, Bs32, Bs33 : signed(15 downto 0);
 signal sub1, sub2, sub3, sub4, sub5, sub6, Aadd1, Aadd2, Badd1, Badd2 :signed(15 downto 0);
 BEGIN
 
-control_loop : PROCESS(currState, start, addrAcc, regCtrlFlag, CtrlFlag_next, regRow1, regRow2, regRow3, dataR, strideCounter, strideCounter_next)
+control_loop : PROCESS(currState, start, addrAcc, regCtrlFlag, CtrlFlag_next, regRow1, regRow2, regRow3, dataR, strideCounter, strideCounter_next, newPixelReg, D1Shifted, D2Shifted)
 BEGIN
 	
 	finish <= '0';
@@ -88,6 +88,27 @@ BEGIN
 	Row3MSB_next <= regRow3(31 downto 16);
 	Row3LSB_next <= regRow3(15 downto 0);
 	newPixelReg_next <= newPixelReg;
+
+	As11 <= signed("00000000" & regRow1(31 downto 24)); 
+	As12 <= signed("00000000" & regRow1(23 downto 16)); 
+	As13 <= signed("00000000" & regRow1(15 downto 8)); 
+	--As21 <= shift_left(signed("00000000" & regRow2(31 downto 24)), 1);
+	--As23 <= shift_left(signed("00000000" & regRow2(15 downto 8)), 1); 
+	As21 <= signed("00000000" & regRow2(31 downto 24));
+	As23 <= signed("00000000" & regRow2(15 downto 8)); 
+	As31 <= signed("00000000" & regRow3(31 downto 24)); 
+	As32 <= signed("00000000" & regRow3(23 downto 16)); 
+	As33 <= signed("00000000" & regRow3(15 downto 8));
+	Bs11 <= signed("00000000" & regRow1(23 downto 16));
+	--Bs12 <= shift_left(signed("00000000" & regRow1(15 downto 8)), 1);
+	Bs12 <= signed("00000000" & regRow1(15 downto 8));
+	Bs13 <= signed("00000000" & regRow1(7 downto 0));
+	Bs21 <= signed("00000000" & regRow2(23 downto 16));
+	Bs23 <= signed("00000000" & regRow2(7 downto 0));
+	--Bs31 <= shift_left(signed("00000000" & regRow3(23 downto 16)), 1);
+	Bs31 <= signed("00000000" & regRow3(23 downto 16));
+	Bs32 <= signed("00000000" & regRow3(15 downto 8));
+	Bs33 <= signed("00000000" & regRow3(7 downto 0));
 	
 	CASE (currState) IS
 		WHEN idle =>
@@ -104,17 +125,17 @@ BEGIN
 			rw <= '1';
 			CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
 
-			if (regCtrlFlag = "000") then
+			if (regCtrlFlag = "00") then
 				Row1MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 176);
 				State_next <= readStateMSB;
 
-			elsif (regCtrlFlag = "001") then
+			elsif (regCtrlFlag = "01") then
 				Row2MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 176);
 				State_next <= readStateMSB;
 
-			elsif (regCtrlFlag = "010") then
+			elsif (regCtrlFlag = "10") then
 				Row3MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) - 351);
 				State_next <= readStateLSB;
@@ -127,20 +148,20 @@ BEGIN
 			rw <= '1';
 			CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
 			
-			if (regCtrlFlag = "000") then
+			if (regCtrlFlag = "00") then
 				Row1LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 176);
 				State_next <= readStateLSB;
 
-			elsif (regCtrlFlag = "001") then
+			elsif (regCtrlFlag = "01") then
 				Row2LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) + 176);
 				State_next <= readStateLSB;
 
-			elsif (regCtrlFlag = "010") then
+			elsif (regCtrlFlag = "10") then
 				Row3LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				addrAcc_next <= word_t(unsigned(addrAcc) - 351);
-				State_next <= invert;
+				State_next <= waitForInvert;
 				strideCounter_next <= byte_t(unsigned(strideCounter)+1);
 			end if;
 		
@@ -202,7 +223,7 @@ BEGIN
 --			Row2LSB_next(15 downto 8) <= D2(7 downto 0);
 
 			CtrlFlag_next <= (others => '0');
-			addrAcc_next <= word_t(unsigned(addrAcc) + 50686);
+			addrAcc_next <= word_t(unsigned(addrAcc) + 50863);
 			State_next <= writeState;
 
 		when writeState =>
@@ -212,7 +233,7 @@ BEGIN
 				
  			--dataW(15 downto 0) <= regRow2(15 downto 8) & regRow2(23 downto 16);
  			dataW(15 downto 0) <= newPixelReg(7 downto 0) & newPixelReg(15 downto 8);
-			addrAcc_next <= word_t(unsigned(addrAcc) - 50686);
+			addrAcc_next <= word_t(unsigned(addrAcc) - 50863);
 			State_next <= decisionState;
 			
 
