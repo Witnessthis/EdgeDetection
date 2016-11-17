@@ -1,12 +1,12 @@
 -- -----------------------------------------------------------------------------
 --
---  Title      :  Edge-Detection design project - task 2.
+--  Title      :  Edge-Detection design project - tL_sk 2.
 --             :
---  Developers :  Jonas Benjamin Borch - init52435@student.dtu.dk
+--  Developers :  JonL_s Benjamin Borch - init52435@student.dtu.dk
 --             :
 --  Purpose    :  This design contains an entity for the accelerator that must be build  
---             :  in task two of the Edge Detection design project. It contains an     
---             :  architecture skeleton for the entity as well.                
+--             :  in tL_sk two of the Edge Detection design project. It contains an     
+--             :  architecture skeleton for the entity L_s well.                
 --             :
 --             :
 --  Revision   :  1.0    7-10-08     Final version
@@ -21,7 +21,7 @@
 -- -----------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
--- The entity for task two. Notice the additional signals for the memory.        
+-- The entity for tL_sk two. Notice the additional signals for the memory.        
 -- reset is active low.
 --------------------------------------------------------------------------------
 
@@ -46,219 +46,192 @@ END acc;
 -- The desription of the accelerator.
 --------------------------------------------------------------------------------
 
-ARCHITECTURE structure OF acc IS
+architecture structure OF acc IS
 
 -- All internal signals are defined here
 -- MaxAddr = ((352*288)/2)-1 = 50687
 -- StartWriteAddress = 50688
-type state_type IS (idle, readStateMSB, readStateLSB, writeState, invert, decisionState, waitForInvert);
+type state_type IS (idle_state, read_left_buffer_state, read_right_buffer_state, write_state, decision_state, sobel_calc_state);
 
 constant IMG_ADDR_OOB : word_t := word_t(to_unsigned(50337, 32));
-constant START_WRITE_ADDR : word_t := word_t(to_unsigned(50688, 32));
+constant RESULT_ADDRESS_SPACE_OFFSET : unsigned := to_unsigned(50863, 32);
 constant STRIDE_SIZE : byte_t := byte_t(to_unsigned(175, 8));
 
-signal addrAcc, addrAcc_next : word_t;
-signal currState, State_next : state_type;
-signal regRow1, regRow2, regRow3 : word_t;
-signal newPixelReg, newPixelReg_next : halfword_t;
-signal Row1MSB_next, Row1LSB_next, Row2MSB_next, Row2LSB_next, Row3MSB_next, Row3LSB_next : halfword_t;
-signal regCtrlFlag, CtrlFlag_next : std_logic_vector(1 downto 0);
-signal strideCounter, strideCounter_next : byte_t;
-signal D1, D2, D1Shifted, D2Shifted : halfword_t;
-signal As11, As12, As13, As21, As23, As31, As32, As33, Bs11, Bs12, Bs13, Bs21, Bs23, Bs31, Bs32, Bs33 : signed(15 downto 0);
-signal sub1, sub2, sub3, sub4, sub5, sub6, Aadd1, Aadd2, Badd1, Badd2 :signed(15 downto 0);
+signal address_pointer, address_pointer_next : word_t;
+signal state, state_next : state_type;
+signal top_buff_reg, middle_buff_reg, bottom_buff_reg : word_t;
+signal writeback_pixel_reg, writeback_pixel_reg_next : halfword_t;
+signal top_left_buff_reg_next, top_right_buff_reg_next, middle_left_buff_reg_next, middle_right_buff_reg_next, bottom_left_buff_reg_next, bottom_right_buff_reg_next : halfword_t;
+signal ctrl_flag_reg, ctrl_flag_reg_next : std_logic_vector(1 downto 0);
+signal stride_counter, stride_counter_next : byte_t;
+signal sobel_pixel_left, sobel_pixel_right, sobel_pixel_left_shifted, sobel_pixel_right_shifted : halfword_t;
+signal L_s11, L_s12, L_s13, L_s21, L_s23, L_s31, L_s32, L_s33, R_s11, R_s12, R_s13, R_s21, R_s23, R_s31, R_s32, R_s33 : signed(15 downto 0);
+signal Aadd1, Aadd2, Badd1, Badd2 :signed(15 downto 0);
 BEGIN
 
-control_loop : PROCESS(currState, start, addrAcc, regCtrlFlag, CtrlFlag_next, regRow1, regRow2, regRow3, dataR, strideCounter, strideCounter_next, newPixelReg, D1Shifted, D2Shifted)
+control_loop : PROCESS(state, start, address_pointer, ctrl_flag_reg, ctrl_flag_reg_next, top_buff_reg, middle_buff_reg, bottom_buff_reg, dataR, stride_counter, stride_counter_next, writeback_pixel_reg, sobel_pixel_left_shifted, sobel_pixel_right_shifted)
 BEGIN
 	
 	finish <= '0';
 	req <= '0';
 	rw <= '0';
-	strideCounter_next <= strideCounter;
+	stride_counter_next <= stride_counter;
 	dataW <= (others => '0');
-	addr <= addrAcc;
-	State_next <= idle;
-	addrAcc_next <= addrAcc;
-	CtrlFlag_next <= regCtrlFlag;
-	Row1MSB_next <= regRow1(31 downto 16);
-	Row1LSB_next <= regRow1(15 downto 0);
-	Row2MSB_next <= regRow2(31 downto 16);
-	Row2LSB_next <= regRow2(15 downto 0);
-	Row3MSB_next <= regRow3(31 downto 16);
-	Row3LSB_next <= regRow3(15 downto 0);
-	newPixelReg_next <= newPixelReg;
+	addr <= address_pointer;
+	state_next <= idle_state;
+	address_pointer_next <= address_pointer;
+	ctrl_flag_reg_next <= ctrl_flag_reg;
+	top_left_buff_reg_next <= top_buff_reg(31 downto 16);
+	top_right_buff_reg_next <= top_buff_reg(15 downto 0);
+	middle_left_buff_reg_next <= middle_buff_reg(31 downto 16);
+	middle_right_buff_reg_next <= middle_buff_reg(15 downto 0);
+	bottom_left_buff_reg_next <= bottom_buff_reg(31 downto 16);
+	bottom_right_buff_reg_next <= bottom_buff_reg(15 downto 0);
+	writeback_pixel_reg_next <= writeback_pixel_reg;
 
-	As11 <= signed("00000000" & regRow1(31 downto 24)); 
-	As12 <= signed("00000000" & regRow1(23 downto 16)); 
-	As13 <= signed("00000000" & regRow1(15 downto 8)); 
-	As21 <= signed("00000000" & regRow2(31 downto 24));
-	As23 <= signed("00000000" & regRow2(15 downto 8)); 
-	As31 <= signed("00000000" & regRow3(31 downto 24)); 
-	As32 <= signed("00000000" & regRow3(23 downto 16)); 
-	As33 <= signed("00000000" & regRow3(15 downto 8));
+	L_s11 <= signed("00000000" & top_buff_reg(31 downto 24)); 
+	L_s12 <= signed("00000000" & top_buff_reg(23 downto 16)); 
+	L_s13 <= signed("00000000" & top_buff_reg(15 downto 8)); 
+	L_s21 <= signed("00000000" & middle_buff_reg(31 downto 24));
+	L_s23 <= signed("00000000" & middle_buff_reg(15 downto 8)); 
+	L_s31 <= signed("00000000" & bottom_buff_reg(31 downto 24)); 
+	L_s32 <= signed("00000000" & bottom_buff_reg(23 downto 16)); 
+	L_s33 <= signed("00000000" & bottom_buff_reg(15 downto 8));
+
+	R_s11 <= signed("00000000" & top_buff_reg(23 downto 16));
+	R_s12 <= signed("00000000" & top_buff_reg(15 downto 8));
+	R_s13 <= signed("00000000" & top_buff_reg(7 downto 0));
+	R_s21 <= signed("00000000" & middle_buff_reg(23 downto 16));
+	R_s23 <= signed("00000000" & middle_buff_reg(7 downto 0));
+	R_s31 <= signed("00000000" & bottom_buff_reg(23 downto 16));
+	R_s32 <= signed("00000000" & bottom_buff_reg(15 downto 8));
+	R_s33 <= signed("00000000" & bottom_buff_reg(7 downto 0));
 	
-	Bs11 <= signed("00000000" & regRow1(23 downto 16));
-	Bs12 <= signed("00000000" & regRow1(15 downto 8));
-	Bs13 <= signed("00000000" & regRow1(7 downto 0));
-	Bs21 <= signed("00000000" & regRow2(23 downto 16));
-	Bs23 <= signed("00000000" & regRow2(7 downto 0));
-	Bs31 <= signed("00000000" & regRow3(23 downto 16));
-	Bs32 <= signed("00000000" & regRow3(15 downto 8));
-	Bs33 <= signed("00000000" & regRow3(7 downto 0));
-	
-	CASE (currState) IS
-		WHEN idle =>
-			addrAcc_next <= (others => '0');
-			CtrlFlag_next <= (others => '0');
+	CL_sE (state) IS
+		WHEN idle_state =>
+			address_pointer_next <= (others => '0');
+			ctrl_flag_reg_next <= (others => '0');
 			if start = '1' then  
-				State_next <= readStateMSB;
+				state_next <= read_left_buffer_state;
 			else
-				State_next <= idle;
+				state_next <= idle_state;
 			end if;
 
-		WHEN readStateMSB =>
+		WHEN read_left_buffer_state =>
 			req <= '1';
 			rw <= '1';
-			CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+			ctrl_flag_reg_next <= std_logic_vector(unsigned(ctrl_flag_reg) + 1);
 
-			if (regCtrlFlag = "00") then
-				Row1MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 176);
-				State_next <= readStateMSB;
+			if (ctrl_flag_reg = "00") then
+				top_left_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				address_pointer_next <= word_t(unsigned(address_pointer) + 176);
+				state_next <= read_left_buffer_state;
 
-			elsif (regCtrlFlag = "01") then
-				Row2MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 176);
-				State_next <= readStateMSB;
+			elsif (ctrl_flag_reg = "01") then
+				middle_left_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				address_pointer_next <= word_t(unsigned(address_pointer) + 176);
+				state_next <= read_left_buffer_state;
 
-			elsif (regCtrlFlag = "10") then
-				Row3MSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				addrAcc_next <= word_t(unsigned(addrAcc) - 351);
-				State_next <= readStateLSB;
-				CtrlFlag_next <= (others => '0');
+			elsif (ctrl_flag_reg = "10") then
+				bottom_left_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				address_pointer_next <= word_t(unsigned(address_pointer) - 351);
+				state_next <= read_right_buffer_state;
+				ctrl_flag_reg_next <= (others => '0');
 
 			end if;
 
-		WHEN readStateLSB =>
+		WHEN read_right_buffer_state =>
 			req <= '1';
 			rw <= '1';
-			CtrlFlag_next <= std_logic_vector(unsigned(regCtrlFlag) + 1);
+			ctrl_flag_reg_next <= std_logic_vector(unsigned(ctrl_flag_reg) + 1);
 			
-			if (regCtrlFlag = "00") then
-				Row1LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 176);
-				State_next <= readStateLSB;
+			if (ctrl_flag_reg = "00") then
+				top_right_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				address_pointer_next <= word_t(unsigned(address_pointer) + 176);
+				state_next <= read_right_buffer_state;
 
-			elsif (regCtrlFlag = "01") then
-				Row2LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				addrAcc_next <= word_t(unsigned(addrAcc) + 176);
-				State_next <= readStateLSB;
+			elsif (ctrl_flag_reg = "01") then
+				middle_right_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				address_pointer_next <= word_t(unsigned(address_pointer) + 176);
+				state_next <= read_right_buffer_state;
 
-			elsif (regCtrlFlag = "10") then
-				Row3LSB_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				addrAcc_next <= word_t(unsigned(addrAcc) - 351);
-				State_next <= waitForInvert;
-				strideCounter_next <= byte_t(unsigned(strideCounter)+1);
+			elsif (ctrl_flag_reg = "10") then
+				bottom_right_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				address_pointer_next <= word_t(unsigned(address_pointer) - 351);
+				state_next <= sobel_calc_state;
+				stride_counter_next <= byte_t(unsigned(stride_counter)+1);
 			end if;
-		
 
-		WHEN invert =>
+		WHEN sobel_calc_state =>
 
-			As11 <= signed("00000000" & regRow1(31 downto 24)); 
-			As12 <= signed("00000000" & regRow1(23 downto 16)); 
-			As13 <= signed("00000000" & regRow1(15 downto 8)); 
-			As21 <= signed("00000000" & regRow2(31 downto 24));
-			As23 <= signed("00000000" & regRow2(15 downto 8)); 
-			As31 <= signed("00000000" & regRow3(31 downto 24)); 
-			As32 <= signed("00000000" & regRow3(23 downto 16)); 
-			As33 <= signed("00000000" & regRow3(15 downto 8)); 
+			writeback_pixel_reg_next(15 downto 8) <= sobel_pixel_left_shifted(7 downto 0);
+			writeback_pixel_reg_next(7 downto 0) <= sobel_pixel_right_shifted(7 downto 0);
 
-			Bs11 <= signed("00000000" & regRow1(23 downto 16));
-			Bs12 <= signed("00000000" & regRow1(15 downto 8));
-			Bs13 <= signed("00000000" & regRow1(7 downto 0));
-			Bs21 <= signed("00000000" & regRow2(23 downto 16));
-			Bs23 <= signed("00000000" & regRow2(7 downto 0));
-			Bs31 <= signed("00000000" & regRow3(23 downto 16));
-			Bs32 <= signed("00000000" & regRow3(15 downto 8));
-			Bs33 <= signed("00000000" & regRow3(7 downto 0));
+			ctrl_flag_reg_next <= (others => '0');
+			address_pointer_next <= word_t(unsigned(address_pointer) + RESULT_ADDRESS_SPACE_OFFSET);
+			state_next <= write_state;
 
-			State_next <= waitForInvert;
-
-		WHEN waitForInvert =>
-
-
-			newPixelReg_next(15 downto 8) <= D1Shifted(7 downto 0);
-			newPixelReg_next(7 downto 0) <= D2Shifted(7 downto 0);
-
-			CtrlFlag_next <= (others => '0');
-			addrAcc_next <= word_t(unsigned(addrAcc) + 50863);
-			State_next <= writeState;
-
-		when writeState =>
+		when write_state =>
 			req <= '1';
 			rw <= '0';
 
- 			dataW(15 downto 0) <= newPixelReg(7 downto 0) & newPixelReg(15 downto 8);
-			addrAcc_next <= word_t(unsigned(addrAcc) - 50863);
-			State_next <= decisionState;
+ 			dataW(15 downto 0) <= writeback_pixel_reg(7 downto 0) & writeback_pixel_reg(15 downto 8);
+			address_pointer_next <= word_t(unsigned(address_pointer) - RESULT_ADDRESS_SPACE_OFFSET);
+			state_next <= decision_state;
 
-		when decisionState =>
-			if (addrAcc > IMG_ADDR_OOB) then
+		when decision_state =>
+			if (address_pointer > IMG_ADDR_OOB) then
 				finish <= '1';
-				State_next <= idle;
-			elsif(strideCounter = STRIDE_SIZE) then
-				strideCounter_next <= (others => '0');
-				CtrlFlag_next <= (others => '0');
-				State_next <= readStateMSB;
+				state_next <= idle_state;
+			elsif(stride_counter = STRIDE_SIZE) then
+				stride_counter_next <= (others => '0');
+				ctrl_flag_reg_next <= (others => '0');
+				state_next <= read_left_buffer_state;
 			else
-				Row1MSB_next <= regRow1(15 downto 0);
-				Row2MSB_next <= regRow2(15 downto 0);
-				Row3MSB_next <= regRow3(15 downto 0);
+				top_left_buff_reg_next <= top_buff_reg(15 downto 0);
+				middle_left_buff_reg_next <= middle_buff_reg(15 downto 0);
+				bottom_left_buff_reg_next <= bottom_buff_reg(15 downto 0);
 
-				State_next <= readStateLSB;
-				CtrlFlag_next <= (others => '0');
+				state_next <= read_right_buffer_state;
+				ctrl_flag_reg_next <= (others => '0');
 			end if ;
 
-	END CASE;
+	END CL_sE;
 END PROCESS control_loop;
 
-Aadd1 <= shift_left((As23 - As21), 1);
-Aadd2 <= shift_left((As12 - As32), 1);
-Badd1 <= shift_left((Bs23 - Bs21), 1);
-Badd2 <= shift_left((Bs12 - Bs32), 1);
+Aadd1 <= shift_left((L_s23 - L_s21), 1);
+Aadd2 <= shift_left((L_s12 - L_s32), 1);
+Badd1 <= shift_left((R_s23 - R_s21), 1);
+Badd2 <= shift_left((R_s12 - R_s32), 1);
 
-D1 <= halfword_t( abs(As13 - As11 + Aadd1 + As33 - As31) + abs(As11 - As31 + Aadd2 + As13 - As33) );
-D2 <= halfword_t( abs(Bs13 - Bs11 + Badd1 + Bs33 - Bs31) + abs(Bs11 - Bs31 + Badd2 + Bs13 - Bs33) );
+sobel_pixel_left <= halfword_t( abs(L_s13 - L_s11 + Aadd1 + L_s33 - L_s31) + abs(L_s11 - L_s31 + Aadd2 + L_s13 - L_s33) );
+sobel_pixel_right <= halfword_t( abs(R_s13 - R_s11 + Badd1 + R_s33 - R_s31) + abs(R_s11 - R_s31 + Badd2 + R_s13 - R_s33) );
 
-D1Shifted <= halfword_t(shift_right(signed(D1), 3));
-D2Shifted <= halfword_t(shift_right(signed(D2), 3));
+sobel_pixel_left_shifted <= halfword_t(shift_right(signed(sobel_pixel_left), 3));
+sobel_pixel_right_shifted <= halfword_t(shift_right(signed(sobel_pixel_right), 3));
 
 myprocess: process(clk,reset)
 begin
   if reset = '1' then
-		addrAcc <= (others => '0');
-		currState <= idle;
-		strideCounter <= (others => '0');
-		regRow1 <= (others => '0');
-		regRow2 <= (others => '0');
-		regRow3 <= (others => '0');
-		regCtrlFlag <= (others => '0');
+		address_pointer <= (others => '0');
+		state <= idle_state;
+		stride_counter <= (others => '0');
+		top_buff_reg <= (others => '0');
+		middle_buff_reg <= (others => '0');
+		bottom_buff_reg <= (others => '0');
+		ctrl_flag_reg <= (others => '0');
   elsif rising_edge(clk) then
-		addrAcc <= addrAcc_next;
-		currState <= State_next;
-		strideCounter <= strideCounter_next;
+		address_pointer <= address_pointer_next;
+		state <= state_next;
+		stride_counter <= stride_counter_next;
 
-		regRow1(31 downto 0) <= Row1MSB_next & Row1LSB_next;
-		regRow2(31 downto 0) <= Row2MSB_next & Row2LSB_next;
-		regRow3(31 downto 0) <= Row3MSB_next & Row3LSB_next;
-		newPixelReg <= newPixelReg_next;
+		top_buff_reg(31 downto 0) <= top_left_buff_reg_next & top_right_buff_reg_next;
+		middle_buff_reg(31 downto 0) <= middle_left_buff_reg_next & middle_right_buff_reg_next;
+		bottom_buff_reg(31 downto 0) <= bottom_left_buff_reg_next & bottom_right_buff_reg_next;
+		writeback_pixel_reg <= writeback_pixel_reg_next;
 
-		regCtrlFlag <= CtrlFlag_next;
+		ctrl_flag_reg <= ctrl_flag_reg_next;
   end if;
 end process myprocess;
 
 END structure;
-
-
-
