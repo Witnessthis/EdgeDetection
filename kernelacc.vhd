@@ -53,8 +53,8 @@ architecture structure OF acc IS
 -- StartWriteAddress = 50688
 type state_type IS (idle_state, read_left_buffer_state, read_right_buffer_state, write_state, decision_state, sobel_calc_state);
 
-constant IMG_ADDR_OOB : word_t := word_t(to_unsigned(50337, 32));
-constant RESULT_ADDRESS_SPACE_OFFSET : unsigned := to_unsigned(50863, 32);
+constant IMG_ADDR_OOB : word_t := word_t(to_unsigned(50336, 32));
+constant RESULT_ADDRESS_SPACE_OFFSET : unsigned := to_unsigned(50686, 32);
 constant STRIDE_SIZE : byte_t := byte_t(to_unsigned(175, 8));
 
 signal address_pointer, address_pointer_next : word_t;
@@ -180,7 +180,7 @@ BEGIN
 			state_next <= decision_state;
 
 		when decision_state =>
-			if (address_pointer > IMG_ADDR_OOB) then
+			if (address_pointer = IMG_ADDR_OOB) then
 				finish <= '1';
 				state_next <= idle_state;
 			elsif(stride_counter = STRIDE_SIZE) then
