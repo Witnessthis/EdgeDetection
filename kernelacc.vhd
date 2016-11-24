@@ -40,7 +40,7 @@ ENTITY acc IS
           rw:         OUT   bit_t;            -- Read/Write signal for data.
           start:      IN    bit_t;
           finish:     OUT    bit_t);
-END acc;
+end acc;
 
 --------------------------------------------------------------------------------
 -- The desription of the accelerator.
@@ -69,7 +69,7 @@ signal L_s11, L_s12, L_s13, L_s21, L_s23, L_s31, L_s32, L_s33, R_s11, R_s12, R_s
 signal Aadd1, Aadd2, Badd1, Badd2 :signed(15 downto 0);
 BEGIN
 
-control_loop : PROCESS(state, start, address_pointer, ctrl_flag_reg, ctrl_flag_reg_next, top_buff_reg, middle_buff_reg, bottom_buff_reg, dataR, stride_counter, stride_counter_next, writeback_pixel_reg, sobel_pixel_left_shifted, sobel_pixel_right_shifted)
+control_loop : process(state, start, address_pointer, ctrl_flag_reg, ctrl_flag_reg_next, top_buff_reg, middle_buff_reg, bottom_buff_reg, dataR, stride_counter, stride_counter_next, writeback_pixel_reg, sobel_pixel_left_shifted, sobel_pixel_right_shifted)
 BEGIN
 	
 	finish <= '0';
@@ -107,8 +107,8 @@ BEGIN
 	R_s32 <= signed("00000000" & bottom_buff_reg(15 downto 8));
 	R_s33 <= signed("00000000" & bottom_buff_reg(7 downto 0));
 	
-	CL_sE (state) IS
-		WHEN idle_state =>
+	case (state) IS
+		when idle_state =>
 			address_pointer_next <= (others => '0');
 			ctrl_flag_reg_next <= (others => '0');
 			if start = '1' then  
@@ -117,7 +117,7 @@ BEGIN
 				state_next <= idle_state;
 			end if;
 
-		WHEN read_left_buffer_state =>
+		when read_left_buffer_state =>
 			req <= '1';
 			rw <= '1';
 			ctrl_flag_reg_next <= std_logic_vector(unsigned(ctrl_flag_reg) + 1);
@@ -140,7 +140,7 @@ BEGIN
 
 			end if;
 
-		WHEN read_right_buffer_state =>
+		when read_right_buffer_state =>
 			req <= '1';
 			rw <= '1';
 			ctrl_flag_reg_next <= std_logic_vector(unsigned(ctrl_flag_reg) + 1);
@@ -162,7 +162,7 @@ BEGIN
 				stride_counter_next <= byte_t(unsigned(stride_counter)+1);
 			end if;
 
-		WHEN sobel_calc_state =>
+		when sobel_calc_state =>
 
 			writeback_pixel_reg_next(15 downto 8) <= sobel_pixel_left_shifted(7 downto 0);
 			writeback_pixel_reg_next(7 downto 0) <= sobel_pixel_right_shifted(7 downto 0);
@@ -196,8 +196,8 @@ BEGIN
 				ctrl_flag_reg_next <= (others => '0');
 			end if ;
 
-	END CL_sE;
-END PROCESS control_loop;
+	end case;
+end process control_loop;
 
 Aadd1 <= shift_left((L_s23 - L_s21), 1);
 Aadd2 <= shift_left((L_s12 - L_s32), 1);
@@ -234,4 +234,4 @@ begin
   end if;
 end process myprocess;
 
-END structure;
+end structure;
