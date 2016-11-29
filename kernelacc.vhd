@@ -54,7 +54,7 @@ architecture structure OF acc IS
 type state_type IS (idle_state, read_left_buffer_state, read_right_buffer_state, write_state, decision_state);
 
 constant IMG_ADDR_OOB : word_t := word_t(to_unsigned(50336, 32));
-constant SOURCE_ADDRESS_SPACE_OFFSET : unsigned := to_unsigned(49984, 32);
+constant SOURCE_ADDRESS_SPACE_OFFSET : unsigned := to_unsigned(50686, 32);
 constant RESULT_ADDRESS_SPACE_OFFSET : unsigned := to_unsigned(50335, 32);
 constant STRIDE_SIZE : byte_t := byte_t(to_unsigned(175, 8));
 
