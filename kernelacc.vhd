@@ -69,7 +69,7 @@ signal L_s11, L_s12, L_s13, L_s21, L_s23, L_s31, L_s32, L_s33, R_s11, R_s12, R_s
 signal Aadd1, Aadd2, Badd1, Badd2 :signed(15 downto 0);
 BEGIN
 
-control_loop : process(state, start, address_pointer, ctrl_flag_reg, ctrl_flag_reg_next, top_buff_reg, middle_buff_reg, bottom_buff_reg, dataR, stride_counter, stride_counter_next, writeback_pixel_reg, sobel_pixel_left_shifted, sobel_pixel_right_shifted)
+control_loop : process(state, start, address_pointer, ctrl_flag_reg, top_buff_reg, middle_buff_reg, bottom_buff_reg, dataR, stride_counter, stride_counter_next, writeback_pixel_reg, sobel_pixel_left_shifted, sobel_pixel_right_shifted)
 BEGIN
 	
 	finish <= '0';
