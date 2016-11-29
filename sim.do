@@ -46,10 +46,6 @@ add wave -group frame_signals -color #fed766 -label bottom_left_buff_reg_next	/t
 add wave -group frame_signals -color #fed766 -label bottom_right_buff_reg_next	/testbench/Accelerator/bottom_right_buff_reg_next
 add wave -group frame_signals -color #fed766 -label bottom_buff_reg 			/testbench/Accelerator/bottom_buff_reg
 
-add wave -group frame_signals -divider writeback_pixel_reg
-add wave -group frame_signals -color #6c6ea0 -label writeback_pixel_reg_next 	/testbench/Accelerator/writeback_pixel_reg_next
-add wave -group frame_signals -color #6c6ea0 -label writeback_pixel_reg 		/testbench/Accelerator/writeback_pixel_reg
-
 add wave -group frame_signals -divider addresses
 add wave -group frame_signals -decimal -label address_pointer 		/testbench/Accelerator/address_pointer
 add wave -group frame_signals -decimal -label address_pointer_next 	/testbench/Accelerator/address_pointer_next

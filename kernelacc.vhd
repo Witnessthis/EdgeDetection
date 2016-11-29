@@ -51,7 +51,7 @@ architecture structure OF acc IS
 -- All internal signals are defined here
 -- MaxAddr = ((352*288)/2)-1 = 50687
 -- StartWriteAddress = 50688
-type state_type IS (idle_state, read_left_buffer_state, read_right_buffer_state, write_state, decision_state, sobel_calc_state);
+type state_type IS (idle_state, read_left_buffer_state, read_right_buffer_state, write_state, decision_state);
 
 constant IMG_ADDR_OOB : word_t := word_t(to_unsigned(50336, 32));
 constant RESULT_ADDRESS_SPACE_OFFSET : unsigned := to_unsigned(50335, 32);
@@ -60,7 +60,6 @@ constant STRIDE_SIZE : byte_t := byte_t(to_unsigned(175, 8));
 signal address_pointer, address_pointer_next : word_t;
 signal state, state_next : state_type;
 signal top_buff_reg, middle_buff_reg, bottom_buff_reg : word_t;
-signal writeback_pixel_reg, writeback_pixel_reg_next : halfword_t;
 signal top_left_buff_reg_next, top_right_buff_reg_next, middle_left_buff_reg_next, middle_right_buff_reg_next, bottom_left_buff_reg_next, bottom_right_buff_reg_next : halfword_t;
 signal ctrl_flag_reg, ctrl_flag_reg_next : std_logic_vector(1 downto 0);
 signal stride_counter, stride_counter_next : byte_t;
@@ -69,7 +68,7 @@ signal L_s11, L_s12, L_s13, L_s21, L_s23, L_s31, L_s32, L_s33, R_s11, R_s12, R_s
 signal Aadd1, Aadd2, Badd1, Badd2 :signed(15 downto 0);
 BEGIN
 
-control_loop : process(state, start, address_pointer, ctrl_flag_reg, top_buff_reg, middle_buff_reg, bottom_buff_reg, dataR, stride_counter, stride_counter_next, writeback_pixel_reg, sobel_pixel_left_shifted, sobel_pixel_right_shifted)
+control_loop : process(state, start, address_pointer, ctrl_flag_reg, top_buff_reg, middle_buff_reg, bottom_buff_reg, dataR, stride_counter, stride_counter_next, sobel_pixel_left_shifted, sobel_pixel_right_shifted)
 BEGIN
 	
 	finish <= '0';
@@ -87,7 +86,6 @@ BEGIN
 	middle_right_buff_reg_next <= middle_buff_reg(15 downto 0);
 	bottom_left_buff_reg_next <= bottom_buff_reg(31 downto 16);
 	bottom_right_buff_reg_next <= bottom_buff_reg(15 downto 0);
-	writeback_pixel_reg_next <= writeback_pixel_reg;
 
 	L_s11 <= signed("00000000" & top_buff_reg(31 downto 24)); 
 	L_s12 <= signed("00000000" & top_buff_reg(23 downto 16)); 
@@ -159,24 +157,17 @@ BEGIN
 				bottom_right_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				--address_pointer_next <= word_t(unsigned(address_pointer) - 351);
 				address_pointer_next <= word_t(unsigned(address_pointer) + RESULT_ADDRESS_SPACE_OFFSET);
-				state_next <= sobel_calc_state;
+				state_next <= write_state;
 				ctrl_flag_reg_next <= (others => '0');
 				stride_counter_next <= byte_t(unsigned(stride_counter)+1);
 			end if;
 
-		when sobel_calc_state =>
+		when write_state =>
 			req <= '1';
 			rw <= '0';
 						
  			dataW(15 downto 0) <= sobel_pixel_right_shifted(7 downto 0) & sobel_pixel_left_shifted(7 downto 0	);
 			address_pointer_next <= word_t(unsigned(address_pointer) - RESULT_ADDRESS_SPACE_OFFSET - 351);
-			state_next <= decision_state;
-
-		when write_state =>
-			req <= '1';
-			rw <= '0';
-
- 			dataW(15 downto 0) <= writeback_pixel_reg(7 downto 0) & writeback_pixel_reg(15 downto 8);
 			state_next <= decision_state;
 
 		when decision_state =>
@@ -228,7 +219,6 @@ begin
 		top_buff_reg(31 downto 0) <= top_left_buff_reg_next & top_right_buff_reg_next;
 		middle_buff_reg(31 downto 0) <= middle_left_buff_reg_next & middle_right_buff_reg_next;
 		bottom_buff_reg(31 downto 0) <= bottom_left_buff_reg_next & bottom_right_buff_reg_next;
-		writeback_pixel_reg <= writeback_pixel_reg_next;
 
 		ctrl_flag_reg <= ctrl_flag_reg_next;
   end if;
