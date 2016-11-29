@@ -159,6 +159,7 @@ BEGIN
 				bottom_right_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				address_pointer_next <= word_t(unsigned(address_pointer) - 351);
 				state_next <= sobel_calc_state;
+				ctrl_flag_reg_next <= (others => '0');
 				stride_counter_next <= byte_t(unsigned(stride_counter)+1);
 			end if;
 
@@ -167,7 +168,6 @@ BEGIN
 			writeback_pixel_reg_next(15 downto 8) <= sobel_pixel_left_shifted(7 downto 0);
 			writeback_pixel_reg_next(7 downto 0) <= sobel_pixel_right_shifted(7 downto 0);
 
-			ctrl_flag_reg_next <= (others => '0');
 			address_pointer_next <= word_t(unsigned(address_pointer) + RESULT_ADDRESS_SPACE_OFFSET);
 			state_next <= write_state;
 
