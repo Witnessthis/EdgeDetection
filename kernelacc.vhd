@@ -61,7 +61,7 @@ constant STRIDE_SIZE : byte_t := byte_t(to_unsigned(175, 8));
 signal address_pointer, address_pointer_next : word_t;
 signal state, state_next : state_type;
 signal top_buff_reg, middle_buff_reg, bottom_buff_reg : word_t;
-signal top_left_buff_reg_next, top_right_buff_reg_next, middle_left_buff_reg_next, middle_right_buff_reg_next, bottom_left_buff_reg_next, bottom_right_buff_reg_next : halfword_t;
+signal top_buff_reg_next, middle_buff_reg_next, bottom_buff_reg_next : word_t;
 signal ctrl_flag_reg, ctrl_flag_reg_next : std_logic_vector(1 downto 0);
 signal stride_counter, stride_counter_next : byte_t;
 signal sobel_pixel_left, sobel_pixel_right, sobel_pixel_left_shifted, sobel_pixel_right_shifted : halfword_t;
@@ -75,18 +75,22 @@ BEGIN
 	finish <= '0';
 	req <= '0';
 	rw <= '0';
-	stride_counter_next <= stride_counter;
 	dataW <= (others => '0');
+
+	stride_counter_next <= stride_counter;
 	addr <= address_pointer;
 	state_next <= idle_state;
 	address_pointer_next <= address_pointer;
 	ctrl_flag_reg_next <= ctrl_flag_reg;
-	top_left_buff_reg_next <= top_buff_reg(31 downto 16);
-	top_right_buff_reg_next <= top_buff_reg(15 downto 0);
-	middle_left_buff_reg_next <= middle_buff_reg(31 downto 16);
-	middle_right_buff_reg_next <= middle_buff_reg(15 downto 0);
-	bottom_left_buff_reg_next <= bottom_buff_reg(31 downto 16);
-	bottom_right_buff_reg_next <= bottom_buff_reg(15 downto 0);
+
+	top_buff_reg_next(31 downto 16) <= top_buff_reg(31 downto 16);
+	top_buff_reg_next(15 downto 0) <= top_buff_reg(15 downto 0);
+
+	middle_buff_reg_next(31 downto 16) <= middle_buff_reg(31 downto 16);
+	middle_buff_reg_next(15 downto 0) <= middle_buff_reg(15 downto 0);
+
+	bottom_buff_reg_next(31 downto 16) <= bottom_buff_reg(31 downto 16);
+	bottom_buff_reg_next(15 downto 0) <= bottom_buff_reg(15 downto 0);
 
 	L_s11 <= signed("00000000" & top_buff_reg(31 downto 24)); 
 	L_s12 <= signed("00000000" & top_buff_reg(23 downto 16)); 
@@ -122,17 +126,17 @@ BEGIN
 			ctrl_flag_reg_next <= std_logic_vector(unsigned(ctrl_flag_reg) + 1);
 
 			if (ctrl_flag_reg = "00") then
-				top_left_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				top_buff_reg_next(31 downto 16) <= dataR(7 downto 0) & dataR(15 downto 8);
 				address_pointer_next <= word_t(unsigned(address_pointer) + 176);
 				state_next <= read_left_buffer_state;
 
 			elsif (ctrl_flag_reg = "01") then
-				middle_left_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				middle_buff_reg_next(31 downto 16) <= dataR(7 downto 0) & dataR(15 downto 8);
 				address_pointer_next <= word_t(unsigned(address_pointer) + 176);
 				state_next <= read_left_buffer_state;
 
 			elsif (ctrl_flag_reg = "10") then
-				bottom_left_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				bottom_buff_reg_next(31 downto 16) <= dataR(7 downto 0) & dataR(15 downto 8);
 				address_pointer_next <= word_t(unsigned(address_pointer) - 351);
 				state_next <= read_right_buffer_state;
 				ctrl_flag_reg_next <= (others => '0');
@@ -145,17 +149,17 @@ BEGIN
 			ctrl_flag_reg_next <= std_logic_vector(unsigned(ctrl_flag_reg) + 1);
 			
 			if (ctrl_flag_reg = "00") then
-				top_right_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				top_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				address_pointer_next <= word_t(unsigned(address_pointer) + 176);
 				state_next <= read_right_buffer_state;
 
 			elsif (ctrl_flag_reg = "01") then
-				middle_right_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				middle_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				address_pointer_next <= word_t(unsigned(address_pointer) + 176);
 				state_next <= read_right_buffer_state;
 
 			elsif (ctrl_flag_reg = "10") then
-				bottom_right_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				bottom_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				address_pointer_next <= word_t(unsigned(address_pointer) + RESULT_ADDRESS_SPACE_OFFSET);
 				state_next <= write_state;
 				ctrl_flag_reg_next <= (others => '0');
@@ -179,9 +183,9 @@ BEGIN
 				ctrl_flag_reg_next <= (others => '0');
 				state_next <= read_left_buffer_state;
 			else
-				top_left_buff_reg_next <= top_buff_reg(15 downto 0);
-				middle_left_buff_reg_next <= middle_buff_reg(15 downto 0);
-				bottom_left_buff_reg_next <= bottom_buff_reg(15 downto 0);
+				top_buff_reg_next(31 downto 16) <= top_buff_reg(15 downto 0);
+				middle_buff_reg_next(31 downto 16) <= middle_buff_reg(15 downto 0);
+				bottom_buff_reg_next(31 downto 16) <= bottom_buff_reg(15 downto 0);
 
 				state_next <= read_right_buffer_state;
 				ctrl_flag_reg_next <= (others => '0');
@@ -216,9 +220,9 @@ begin
 		state <= state_next;
 		stride_counter <= stride_counter_next;
 
-		top_buff_reg(31 downto 0) <= top_left_buff_reg_next & top_right_buff_reg_next;
-		middle_buff_reg(31 downto 0) <= middle_left_buff_reg_next & middle_right_buff_reg_next;
-		bottom_buff_reg(31 downto 0) <= bottom_left_buff_reg_next & bottom_right_buff_reg_next;
+		top_buff_reg(31 downto 0) <= top_buff_reg_next;
+		middle_buff_reg(31 downto 0) <= middle_buff_reg_next;
+		bottom_buff_reg(31 downto 0) <= bottom_buff_reg_next;
 
 		ctrl_flag_reg <= ctrl_flag_reg_next;
   end if;

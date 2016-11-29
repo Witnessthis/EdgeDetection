@@ -32,18 +32,12 @@ add wave -group ram_signals -label req			 /testbench/req
 add wave -group ram_signals -label rw			 /testbench/rw
 
 add wave -group frame_signals -divider frame_row_1
-add wave -group frame_signals -color #93e1d8 -label top_left_buff_reg_next 	/testbench/Accelerator/top_left_buff_reg_next
-add wave -group frame_signals -color #93e1d8 -label top_right_buff_reg_next /testbench/Accelerator/top_right_buff_reg_next
 add wave -group frame_signals -color #93e1d8 -label top_buff_reg 			/testbench/Accelerator/top_buff_reg
 
 add wave -group frame_signals -divider frame_row_2
-add wave -group frame_signals -color #6c6ea0 -label middle_left_buff_reg_next	/testbench/Accelerator/middle_left_buff_reg_next
-add wave -group frame_signals -color #6c6ea0 -label middle_right_buff_reg_next	/testbench/Accelerator/middle_right_buff_reg_next
 add wave -group frame_signals -color #6c6ea0 -label middle_buff_reg 			/testbench/Accelerator/middle_buff_reg
 
 add wave -group frame_signals -divider frame_row_3
-add wave -group frame_signals -color #fed766 -label bottom_left_buff_reg_next	/testbench/Accelerator/bottom_left_buff_reg_next
-add wave -group frame_signals -color #fed766 -label bottom_right_buff_reg_next	/testbench/Accelerator/bottom_right_buff_reg_next
 add wave -group frame_signals -color #fed766 -label bottom_buff_reg 			/testbench/Accelerator/bottom_buff_reg
 
 add wave -group frame_signals -divider addresses
