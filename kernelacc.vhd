@@ -156,7 +156,6 @@ BEGIN
 
 			elsif (ctrl_flag_reg = "10") then
 				bottom_right_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				--address_pointer_next <= word_t(unsigned(address_pointer) - 351);
 				address_pointer_next <= word_t(unsigned(address_pointer) + RESULT_ADDRESS_SPACE_OFFSET);
 				state_next <= write_state;
 				ctrl_flag_reg_next <= (others => '0');
