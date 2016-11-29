@@ -54,7 +54,7 @@ architecture structure OF acc IS
 type state_type IS (idle_state, read_left_buffer_state, read_right_buffer_state, write_state, decision_state, sobel_calc_state);
 
 constant IMG_ADDR_OOB : word_t := word_t(to_unsigned(50336, 32));
-constant RESULT_ADDRESS_SPACE_OFFSET : unsigned := to_unsigned(50686, 32);
+constant RESULT_ADDRESS_SPACE_OFFSET : unsigned := to_unsigned(50335, 32);
 constant STRIDE_SIZE : byte_t := byte_t(to_unsigned(175, 8));
 
 signal address_pointer, address_pointer_next : word_t;
@@ -157,26 +157,26 @@ BEGIN
 
 			elsif (ctrl_flag_reg = "10") then
 				bottom_right_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				address_pointer_next <= word_t(unsigned(address_pointer) - 351);
+				--address_pointer_next <= word_t(unsigned(address_pointer) - 351);
+				address_pointer_next <= word_t(unsigned(address_pointer) + RESULT_ADDRESS_SPACE_OFFSET);
 				state_next <= sobel_calc_state;
 				ctrl_flag_reg_next <= (others => '0');
 				stride_counter_next <= byte_t(unsigned(stride_counter)+1);
 			end if;
 
 		when sobel_calc_state =>
-
-			writeback_pixel_reg_next(15 downto 8) <= sobel_pixel_left_shifted(7 downto 0);
-			writeback_pixel_reg_next(7 downto 0) <= sobel_pixel_right_shifted(7 downto 0);
-
-			address_pointer_next <= word_t(unsigned(address_pointer) + RESULT_ADDRESS_SPACE_OFFSET);
-			state_next <= write_state;
+			req <= '1';
+			rw <= '0';
+						
+ 			dataW(15 downto 0) <= sobel_pixel_right_shifted(7 downto 0) & sobel_pixel_left_shifted(7 downto 0	);
+			address_pointer_next <= word_t(unsigned(address_pointer) - RESULT_ADDRESS_SPACE_OFFSET - 351);
+			state_next <= decision_state;
 
 		when write_state =>
 			req <= '1';
 			rw <= '0';
 
  			dataW(15 downto 0) <= writeback_pixel_reg(7 downto 0) & writeback_pixel_reg(15 downto 8);
-			address_pointer_next <= word_t(unsigned(address_pointer) - RESULT_ADDRESS_SPACE_OFFSET);
 			state_next <= decision_state;
 
 		when decision_state =>
