@@ -69,7 +69,7 @@ signal L_s11, L_s12, L_s13, L_s21, L_s23, L_s31, L_s32, L_s33, R_s11, R_s12, R_s
 signal Aadd1, Aadd2, Badd1, Badd2 :signed(15 downto 0);
 BEGIN
 
-control_loop : process(state, start, address_pointer, ctrl_flag_reg, top_buff_reg, middle_buff_reg, bottom_buff_reg, dataR, stride_counter, stride_counter_next, sobel_pixel_left_shifted, sobel_pixel_right_shifted)
+control_loop : process(state, start, address_pointer, ctrl_flag_reg, top_buff_reg, middle_buff_reg, bottom_buff_reg, dataR, stride_counter, stride_counter_next, sobel_pixel_left_shifted, sobel_pixel_right_shifted, address_pointer_next)
 BEGIN
 	
 	finish <= '0';
@@ -175,7 +175,6 @@ BEGIN
 
 			if (address_pointer_next = IMG_ADDR_OOB) then
 				finish <= '1';
-				state_next <= decision_state;
 				if (start='0') then
 					state_next <= idle_state;
 				end if;
