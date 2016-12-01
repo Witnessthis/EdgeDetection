@@ -28,7 +28,7 @@ vlib work
 vcom -quiet types.vhd
 vcom -quiet clock.vhd
 vcom -quiet memory2.vhd
-vcom -quiet kernelacc.vhd
+vcom -quiet acc2.vhd
 vcom -quiet test2.vhd
 
 # The -quiet option disables output from the vcom command
