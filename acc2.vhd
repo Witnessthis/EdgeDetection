@@ -226,9 +226,9 @@ begin
 		state <= state_next;
 		stride_counter <= stride_counter_next;
 
-		top_buff_reg(31 downto 0) <= top_buff_reg_next;
-		middle_buff_reg(31 downto 0) <= middle_buff_reg_next;
-		bottom_buff_reg(31 downto 0) <= bottom_buff_reg_next;
+		top_buff_reg <= top_buff_reg_next;
+		middle_buff_reg <= middle_buff_reg_next;
+		bottom_buff_reg <= bottom_buff_reg_next;
 
 		ctrl_flag_reg <= ctrl_flag_reg_next;
   end if;
