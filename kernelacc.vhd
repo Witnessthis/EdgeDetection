@@ -124,15 +124,14 @@ BEGIN
 			req <= '1';
 			rw <= '1';
 			ctrl_flag_reg_next <= std_logic_vector(unsigned(ctrl_flag_reg) + 1);
+			address_pointer_next <= word_t(unsigned(address_pointer) + 176);
 
 			if (ctrl_flag_reg = "00") then
 				top_buff_reg_next(31 downto 16) <= dataR(7 downto 0) & dataR(15 downto 8);
-				address_pointer_next <= word_t(unsigned(address_pointer) + 176);
 				state_next <= read_left_buffer_state;
 
 			elsif (ctrl_flag_reg = "01") then
 				middle_buff_reg_next(31 downto 16) <= dataR(7 downto 0) & dataR(15 downto 8);
-				address_pointer_next <= word_t(unsigned(address_pointer) + 176);
 				state_next <= read_left_buffer_state;
 
 			elsif (ctrl_flag_reg = "10") then
@@ -147,15 +146,14 @@ BEGIN
 			req <= '1';
 			rw <= '1';
 			ctrl_flag_reg_next <= std_logic_vector(unsigned(ctrl_flag_reg) + 1);
+			address_pointer_next <= word_t(unsigned(address_pointer) + 176);
 			
 			if (ctrl_flag_reg = "00") then
 				top_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				address_pointer_next <= word_t(unsigned(address_pointer) + 176);
 				state_next <= read_right_buffer_state;
 
 			elsif (ctrl_flag_reg = "01") then
 				middle_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-				address_pointer_next <= word_t(unsigned(address_pointer) + 176);
 				state_next <= read_right_buffer_state;
 
 			elsif (ctrl_flag_reg = "10") then
