@@ -177,7 +177,10 @@ BEGIN
 		when decision_state =>
 			if (address_pointer = IMG_ADDR_OOB) then
 				finish <= '1';
-				state_next <= idle_state;
+				state_next <= decision_state;
+				if (start='0') then
+					state_next <= idle_state;
+				end if;
 			elsif(stride_counter = STRIDE_SIZE) then
 				stride_counter_next <= (others => '0');
 				ctrl_flag_reg_next <= (others => '0');
@@ -198,6 +201,7 @@ Aadd1 <= shift_left((L_s23 - L_s21), 1);
 Aadd2 <= shift_left((L_s12 - L_s32), 1);
 Badd1 <= shift_left((R_s23 - R_s21), 1);
 Badd2 <= shift_left((R_s12 - R_s32), 1);
+
 
 sobel_pixel_left <= halfword_t( abs(L_s13 - L_s11 + Aadd1 + L_s33 - L_s31) + abs(L_s11 - L_s31 + Aadd2 + L_s13 - L_s33) );
 sobel_pixel_right <= halfword_t( abs(R_s13 - R_s11 + Badd1 + R_s33 - R_s31) + abs(R_s11 - R_s31 + Badd2 + R_s13 - R_s33) );
