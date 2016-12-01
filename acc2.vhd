@@ -111,6 +111,7 @@ BEGIN
 	R_s33 <= signed("00000000" & bottom_buff_reg(7 downto 0));
 	
 	case (state) IS
+		-- waits for the start signal to be asserted high
 		when idle_state =>
 			address_pointer_next <= (others => '0');
 			ctrl_flag_reg_next <= (others => '0');
@@ -120,6 +121,7 @@ BEGIN
 				state_next <= idle_state;
 			end if;
 
+		-- read data from dataR into the MSBs of the buffer registers
 		when read_left_buffer_state =>
 			req <= '1';
 			rw <= '1';
@@ -133,15 +135,17 @@ BEGIN
 			elsif (ctrl_flag_reg = "01") then
 				middle_buff_reg_next(31 downto 16) <= dataR(7 downto 0) & dataR(15 downto 8);
 				state_next <= read_left_buffer_state;
-
 			elsif (ctrl_flag_reg = "10") then
 				bottom_buff_reg_next(31 downto 16) <= dataR(7 downto 0) & dataR(15 downto 8);
+			-- restore the address_pointer to the address of the pixel pair
+			-- neighboring the pixels in top_buff_reg (i.e. the address next to it)
 				address_pointer_next <= word_t(unsigned(address_pointer) - 351);
 				state_next <= read_right_buffer_state;
 				ctrl_flag_reg_next <= (others => '0');
 
 			end if;
 
+		-- read data from dataR into the LSBs of the buffer registers
 		when read_right_buffer_state =>
 			req <= '1';
 			rw <= '1';
@@ -158,6 +162,7 @@ BEGIN
 
 			elsif (ctrl_flag_reg = "10") then
 				bottom_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
+				-- set the address_pointer to hold the address of the destination region in RAM
 				address_pointer_next <= word_t(unsigned(address_pointer) + RESULT_ADDRESS_SPACE_OFFSET);
 				state_next <= decision_state;
 				ctrl_flag_reg_next <= (others => '0');
