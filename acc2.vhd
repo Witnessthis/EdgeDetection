@@ -131,9 +131,8 @@ BEGIN
 
 			if (ctrl_flag_reg = "00") then
 				top_buff_reg_next(31 downto 16) <= dataR(7 downto 0) & dataR(15 downto 8);
-
 			elsif (ctrl_flag_reg = "01") then
-				middle_buff_reg_next(31 downto 16) <= dataR(7 downto 0) & dataR(15 downto 8);
+				middle_buff_reg_next(31 downto 16) <= dataR(7 downto 0) & dataR(15 downto 8);	
 			else
 				bottom_buff_reg_next(31 downto 16) <= dataR(7 downto 0) & dataR(15 downto 8);
 			-- restore the address_pointer to the address of the pixel pair
@@ -154,10 +153,8 @@ BEGIN
 			
 			if (ctrl_flag_reg = "00") then
 				top_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-
 			elsif (ctrl_flag_reg = "01") then
 				middle_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
-
 			else
 				bottom_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				-- set the address_pointer to hold the address of the destination region in RAM
@@ -212,20 +209,20 @@ begin
 		address_pointer <= (others => '0');
 		state <= idle_state;
 		stride_counter <= (others => '0');
+		ctrl_flag_reg <= (others => '0');
+		
 		top_buff_reg <= (others => '0');
 		middle_buff_reg <= (others => '0');
 		bottom_buff_reg <= (others => '0');
-		ctrl_flag_reg <= (others => '0');
   elsif rising_edge(clk) then
 		address_pointer <= address_pointer_next;
 		state <= state_next;
 		stride_counter <= stride_counter_next;
-
+		ctrl_flag_reg <= ctrl_flag_reg_next;
+		
 		top_buff_reg <= top_buff_reg_next;
 		middle_buff_reg <= middle_buff_reg_next;
 		bottom_buff_reg <= bottom_buff_reg_next;
-
-		ctrl_flag_reg <= ctrl_flag_reg_next;
   end if;
 end process myprocess;
 
