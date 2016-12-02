@@ -185,15 +185,12 @@ BEGIN
 				end if;
 			elsif(stride_counter = STRIDE_SIZE) then
 				stride_counter_next <= (others => '0');
-				ctrl_flag_reg_next <= (others => '0');
 				state_next <= read_left_buffer_state;
 			else
 				top_buff_reg_next(31 downto 16) <= top_buff_reg(15 downto 0);
 				middle_buff_reg_next(31 downto 16) <= middle_buff_reg(15 downto 0);
 				bottom_buff_reg_next(31 downto 16) <= bottom_buff_reg(15 downto 0);
-
 				state_next <= read_right_buffer_state;
-				ctrl_flag_reg_next <= (others => '0');
 			end if ;
 
 	end case;
