@@ -176,10 +176,10 @@ BEGIN
 						
  			dataW(15 downto 0) <= sobel_pixel_right_shifted(7 downto 0) & sobel_pixel_left_shifted(7 downto 0	);
 			address_pointer_next <= word_t(unsigned(address_pointer) - SOURCE_ADDRESS_SPACE_OFFSET);
-			state_next <= decision_state;
 
 			if (address_pointer_next = IMG_ADDR_OOB) then
 				finish <= '1';
+				state_next <= decision_state;
 				if (start='0') then
 					state_next <= idle_state;
 				end if;
