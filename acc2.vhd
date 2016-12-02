@@ -134,7 +134,7 @@ BEGIN
 
 			elsif (ctrl_flag_reg = "01") then
 				middle_buff_reg_next(31 downto 16) <= dataR(7 downto 0) & dataR(15 downto 8);
-			elsif (ctrl_flag_reg = "10") then
+			else
 				bottom_buff_reg_next(31 downto 16) <= dataR(7 downto 0) & dataR(15 downto 8);
 			-- restore the address_pointer to the address of the pixel pair
 			-- neighboring the pixels in top_buff_reg (i.e. the address next to it)
@@ -158,7 +158,7 @@ BEGIN
 			elsif (ctrl_flag_reg = "01") then
 				middle_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 
-			elsif (ctrl_flag_reg = "10") then
+			else
 				bottom_buff_reg_next(15 downto 0) <= dataR(7 downto 0) & dataR(15 downto 8);
 				-- set the address_pointer to hold the address of the destination region in RAM
 				address_pointer_next <= word_t(unsigned(address_pointer) + RESULT_ADDRESS_SPACE_OFFSET);
